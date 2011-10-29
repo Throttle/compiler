@@ -1,0 +1,6 @@
+Thumbs.db
+compiler/bin/*
+compiler/bin/
+compiler/obj/*
+compiler/obj/
+*.suo
