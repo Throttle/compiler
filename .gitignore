@@ -1,6 +1,6 @@
-Thumbs.db
-compiler/bin/*
-compiler/bin/
-compiler/obj/*
-compiler/obj/
-*.suo
+compiler/Thumbs.db
+compiler/compiler/bin/*
+compiler/compiler/bin/
+compiler/compiler/obj/*
+compiler/compiler/obj/
+compiler/*.suo
