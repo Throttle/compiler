@@ -4,3 +4,4 @@ compiler/compiler/bin/
 compiler/compiler/obj/*
 compiler/compiler/obj/
 compiler/*.suo
+.gitignore
