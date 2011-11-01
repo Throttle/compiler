@@ -1,1 +1,1 @@
-Some text2 in another file, non-modified.
+Some text2 in another file, MODIFIED!
