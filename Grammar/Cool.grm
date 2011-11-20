@@ -1,0 +1,238 @@
+﻿"Name"    = 'Cool' 
+"Version" = '1.0'
+"Author"  = 'Dmitry Radchenko, Alexander Soulimov' 
+"About"   = 'The COOL Programming Language'
+
+"Case Sensitive" = True
+"Start Symbol"   = <PROGRAM>
+                 
+Id = [_]*{Letter}+{Digit}*
+Number = {Digit}+
+
+{String Ch}      = {Printable} - ["]
+{Char Ch}        = {Printable} - ['']
+StringLiteral    = '"'( {String Ch} | '\'{Printable} )* '"'
+CharLiteral      = '' ( {Char Ch} | '\'{Printable} )''
+                 
+! ======================================================
+! Comments
+! ======================================================
+
+Comment Block @= {Nesting = None, Advance = Character}
+               
+Comment Start = '/*'
+Comment End   = '*/'
+Comment Line  = '//'
+              
+!=======================================================
+! Rules
+! ======================================================
+
+<PROGRAM> ::= <CLASS> <PROGRAM>
+            | <METHOD> <PROGRAM>
+            |
+           
+<ACCESS_SPEC> ::= private
+                | protected
+                | public
+              
+<ADDOP> ::= '+'
+          | '-'
+          
+<ALLOCATOR> ::= new <TYPE_ID>'('<ARGLIST>')'
+              | new <TYPE_ID>'['<EXPR>']'
+              
+<ARGLIST> ::= <EXPRR>
+            |
+           
+<EXPRR> ::= <EXPR>
+          | <EXPR>','<EXPRR>
+
+<ASSIGNSTMT> ::= <FACTOR>'='<EXPR>
+             
+<BEXPR> ::= <SIMPLEEXPR>
+          | <SIMPLEEXPR> <RELOP> <SIMPLEEXPR>
+         
+<BLOCK> ::= <VARDECS> begin <STMTLIST> end
+         
+<BODY> ::= <SUPER_INIT> <THIS_INIT> <BLOCK>
+        
+<CALLSTMT> ::= call <FACTOR>
+            
+<CAST_EXPR> ::= cast'('<TYPE_ID>','<EXPR>')'
+             
+<CATCH_CLAUSE> ::= catch'('<TYPE_ID> Id')' <STMTLIST>
+                
+<CEXPR> ::= <BEXPR>
+          | <BEXPR> and <CEXPR>
+          
+<CLASS> ::= class Id <SUPER_CLASS> is <CLASS_MEMBERR> end Id
+          
+<CLASS_MEMBERR> ::= <CLASS_MEMBER> <CLASS_MEMBERR>
+                  |
+
+<CLASS_MEMBER> ::= <FIELD_DECL>
+                 | <METHOD_DECL>
+
+<ELSEPART> ::= else <STMTLIST>
+             |
+             
+<EXPR> ::= <CEXPR>
+         | <CEXPR> or <EXPR>
+         
+<FACTOR> ::= '-'<FACTOR>
+           | not <FACTOR>
+           | Number
+           | false
+           | true
+           | null
+           | <ALLOCATOR>
+           | <CAST_EXPR>
+           | <VALUE_OR_REF> <MEMBER_PARTT>
+
+<MEMBER_PARTT> ::= <MEMBER_PART> <MEMBER_PARTT>
+                 |
+                 
+
+!ПРОВЕРИТЬ!!!!!!
+
+<FIELD_DECL> ::= <ACCESS_SPEC> <TYPE> Id <FIELD_DECLL>';'
+              
+<FIELD_DECLL> ::= ','Id<FIELD_DECLL>
+                |
+
+!ПРОВЕРИТЬ!!!!!!
+
+<IFSTMT> ::= if <EXPR> then <STMTLIST> <ELSEIF_PART> <ELSEPART> end if
+          
+<ELSEIF_PART> ::= elsif <EXPR> then <STMTLIST> <ELSEIF_PART>
+                |
+
+<INPUTSTMT> ::= input'>>'<FACTOR>
+
+<LOOPSTMT> ::= loop <STMTLIST> end loop
+
+<MEMBER_PART> ::= '.'Id
+               | '.'Id'('<ARGLIST>')'
+               | '.'Id'['<EXPR>']'
+               
+<METHOD> ::= method <M_TYPE> <METHOD_ID>'('<PARAMETERS>')' is <BODY> Id
+
+<METHOD_DECL> ::= <ACCESS_SPEC> method <M_TYPE> Id'('<PARAMETER_DECL>')'';'
+
+<METHOD_ID> ::= Id'::'Id
+              | Id
+
+<M_TYPE> ::= <TYPE>
+           | void
+           
+<MULTOP> ::= '*'
+           | '/'
+           | mod
+           
+<OPTIONAL_ID> ::= Id
+                |
+
+<OUTPUTSTMT> ::= output'<<'<EXPR>
+               | output'<<'<STRING_OR_CHAR>
+               
+<STRING_OR_CHAR> ::= StringLiteral
+                   | CharLiteral
+                   |
+       
+!здесь возможно нужно ещё пусто из PARAMETER_DECL - проверить!!!
+!сделал!!!
+<PARAMETER_DECL> ::= <TYPE> <OPTIONAL_ID> <PARAMETER_DECLL>
+                   |
+                   
+<PARAMETER_DECLL> ::= ','<TYPE> <OPTIONAL_ID> <PARAMETER_DECLL>
+                    |
+
+!здесь возможно нужно ещё пусто из PARAMETERS - потом проверить, когда все раскомменчу!!!
+!сделал
+<PARAMETERS> ::= <TYPE> Id <TYPEE>
+               |
+
+<TYPEE> ::= ','<TYPE> Id <TYPEE>
+          |
+          
+<RELOP> ::= '=='
+          | '<'
+          | '<='
+          | '>'
+          | '>=' 
+          | '#'
+          
+<SIMPLEEXPR> ::= <TERM> <SIMPLEEXPRR>
+              
+<SIMPLEEXPRR> ::= <ADDOP> <TERM> <SIMPLEEXPRR>
+                |
+
+<STMT> ::= <BLOCK> 
+         | <TRYSTMT>
+         | <IFSTMT>
+         | <LOOPSTMT>
+         | <ASSIGNSTMT>
+         | <CALLSTMT>
+         | <OUTPUTSTMT>
+         | <INPUTSTMT>
+         | continue
+         | break
+         | return
+         | return <EXPR>
+         | exit
+         | throw <EXPR>
+         
+!добавить переход в пустоту попробовать!!!
+!сделал
+<STMTLIST> ::= <STMT>';'<STMTLISTT>
+             |
+            
+<STMTLISTT> ::= <STMT>';'<STMTLISTT>
+              |
+           
+<SUPER_INIT> ::= super'('<ARGLIST>')'
+               |
+
+<SUPER_CLASS> ::= extends Id
+                |
+
+<TERM> ::= <FACTOR> <TERMM>
+        
+<TERMM> ::= <MULTOP> <FACTOR> <TERMM>
+          |
+
+<THIS_INIT> ::= this'('<ARGLIST>')'
+              |
+
+<TRYSTMT> ::= try <STMTLIST> <CATCH_CLAUSE> <CATCH_CLAUSEE> end try
+           
+<CATCH_CLAUSEE> ::= <CATCH_CLAUSE> <CATCH_CLAUSEE>
+                  |
+
+<TYPE> ::= <TYPE_ID>
+         | <TYPE_ID>'[]'
+         
+<TYPE_ID> ::= integer
+          | boolean
+          | Id
+          
+<VALUE_OR_REF> ::= this
+                 | super
+                 | Id
+                 | Id'['<EXPR>']'
+                 | Id'('<ARGLIST>')'
+                 | '('<EXPR>')'
+
+<VARDECLIST> ::= <TYPE> Id<TYPEEE>';'
+              
+<TYPEEE> ::= ','Id<TYPEE>
+           |
+
+!добавить уход в пустоту - попробовать)
+!добавил
+<VARDECS> ::= declare <VARDECLIST> <VARDECLISTT>
+            |
+
+<VARDECLISTT> ::= <VARDECLIST> <VARDECLISTT>
+                 |
