@@ -36,6 +36,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GOLD Engine">
+      <HintPath>.\GOLD Engine.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -59,11 +62,15 @@
     <Compile Include="Controls\CoolTabItem.xaml.cs">
       <DependentUpon>CoolTabItem.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CoolParser.cs" />
+    <Compile Include="Dialogs\Results.xaml.cs">
+      <DependentUpon>Results.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\ExitDialogBox.xaml.cs">
       <DependentUpon>ExitDialogBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="RelayCommand.cs" />
-    <Compile Include="ScrollableTabPanel.cs" />
+    <Compile Include="TabCode\RelayCommand.cs" />
+    <Compile Include="TabCode\ScrollableTabPanel.cs" />
     <Page Include="Controls\CoolTabItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -80,6 +87,10 @@
       <DependentUpon>CoolCompiler.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Dialogs\Results.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Dialogs\ExitDialogBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -103,13 +114,19 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Cool.egt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\programming.png" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\img_warning.png" />
   </ItemGroup>

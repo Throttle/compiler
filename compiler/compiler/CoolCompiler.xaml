@@ -7,7 +7,7 @@
         xmlns:mwt="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         Title="Cool Compiler" 
         Height="600" 
-        Width="800" Closing="Window_Closing">
+        Width="800" Closing="Window_Closing" Icon="/compiler;component/Images/programming.png">
     <Window.Resources>
         <!-- 
          This color will be used to draw a border around the TabControl, on 
@@ -966,18 +966,18 @@
                     <MenuItem x:Name="miFormat" Header="Font..."/>
                 </MenuItem>
                 <MenuItem Header="Debug">
-                    <MenuItem x:Name="miLA" Header="Lexical Analyse (5)"/>
-                    <MenuItem x:Name="miSA" Header="Syntax  Analyse (6)"/>
-                    <MenuItem x:Name="miCG" Header="Code Generation (7)"/>
-                    <MenuItem x:Name="miCS" Header="Code Simulation (8)"/>
+                    <MenuItem x:Name="miLA" Header="Lexical and syntax analyse" Click="miLA_Click"/>
+                    <MenuItem x:Name="miCG" Header="Code Generation"/>
+                    <MenuItem x:Name="miCS" Header="Code Simulation"/>
                 </MenuItem>
                 <MenuItem Header="Help">
                     <MenuItem Header="About"/>
                 </MenuItem>
             </Menu>
-            <TabControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" x:Name="tc" Margin="5" SelectedIndex="0"/>
+            <TabControl Grid.Row="1" Grid.Column="1" x:Name="tc" Margin="37,5,5,0" SelectedIndex="0"/>
             <StatusBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
             </StatusBar>
+            <TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Hidden" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" Margin="0,49,0,0" Name="txtNumeration" VerticalAlignment="Stretch" Width="39" BorderBrush="#00000000" CaretBrush="#FF4A4AD4" TextAlignment="Right" Foreground="#FF4646D3" />
         </Grid>        
     </DockPanel>
 </Window>

@@ -11,21 +11,72 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.IO;
+
 using compiler.Controls;
 using compiler.Dialogs;
 
-
 namespace compiler
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class CoolCompiler : Window
     {
+        private CoolParser myParser = new CoolParser();
+        private int _lastCountLines;
+
         public CoolCompiler()
         {
             InitializeComponent();
             this.DataContext = this;
+
+            LoadGrammarFile();
+
+            _lastCountLines = 0;
+            tc.KeyUp += new KeyEventHandler(tc_KeyUp);
+        }
+
+        void tc_KeyUp(object sender, KeyEventArgs e)
+        {
+            int newCount = CountLinesInText((tc.SelectedItem as CoolTabItem).Code);
+
+            if (newCount != _lastCountLines)
+            {
+                _lastCountLines = newCount;
+                NumberLines();
+            }
+        }
+
+        private int CountLinesInText(string text)
+        {
+            int count = 1;
+            foreach (char c in text)
+                if (c == '\n') count++;
+
+            return count;
+        }
+
+        private void NumberLines()
+        {
+            txtNumeration.Text = "";
+            for (int i = 1; i <= _lastCountLines; i++)
+                txtNumeration.Text += String.Format("{0}\n", i);
+            txtNumeration.ScrollToEnd();
+        }
+
+        private void LoadGrammarFile()
+        {
+            try
+            {
+                string pathToGrammarEGT = String.Format(@"{0}\{1}",
+                                                 System.IO.Directory.GetCurrentDirectory(),
+                                                 "Cool.egt").Replace("\\", "/");
+                myParser.Setup(pathToGrammarEGT);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("The error occured while trying to load EGT grammar file.\n{0}\nThe application will be closed.", ex.Message),
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.Close();
+            }
         }
 
         private void miNew_Click(object sender, RoutedEventArgs e)
@@ -182,6 +233,29 @@ namespace compiler
                 // Save document
                 (this.tc.SelectedItem as CoolTabItem).Save(dlg.FileName);
             }
+        }
+
+        /// <summary>
+        /// Обработчик события нажатия на кнопку лексического и синтаксического анализа
+        /// </summary>
+        private void miLA_Click(object sender, RoutedEventArgs e)
+        {
+            if (tc.Items.Count > 0)
+            {
+                string code = (tc.SelectedItem as CoolTabItem).Code;
+                if (!String.IsNullOrEmpty(code))
+                {  //парсинг
+                    Results resForm = myParser.Parse(new StringReader(code))
+                        ? new Results(false, "", myParser.Root)
+                        : new Results(true, myParser.FailMessage, null);
+
+                    resForm.ShowDialog();
+                }
+                else
+                    MessageBox.Show("Empty code", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+                MessageBox.Show("No code for parsing", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

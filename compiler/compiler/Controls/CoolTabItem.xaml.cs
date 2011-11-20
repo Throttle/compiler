@@ -14,9 +14,6 @@ using System.Windows.Shapes;
 
 namespace compiler.Controls
 {
-    /// <summary>
-    /// Interaction logic for CoolTabItem.xaml
-    /// </summary>
     public partial class CoolTabItem : TabItem
     {
         private string backup = "";
