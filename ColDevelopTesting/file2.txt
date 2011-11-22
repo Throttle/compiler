@@ -1,1 +1,3 @@
 Some text2 in another file, MODIFIED!
+
+feature2
