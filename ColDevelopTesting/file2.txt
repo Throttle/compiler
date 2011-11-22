@@ -1,1 +1,7 @@
+<<<<<<< HEAD
 Some text2 in another file, modified NOW !!!
+=======
+Some text2 in another file, MODIFIED!
+
+feature2
+>>>>>>> release/0.1
