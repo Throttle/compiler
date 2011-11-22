@@ -1,0 +1,132 @@
+Ключевые слова:
+------------------------------------------------------------------
+private, protected, public,
+new, class, super, this, declare
+begin, end,
+call, cast,
+try, catch, throw,
+is,
+and, or, not,
+false, true,
+null,
+if, then, else, elsif,
+input, output, 
+loop, method, void, mod, 
+continue, break, return, exit,
+extends,
+
+Типы
+------------------------------------------------------------------
+a.	ЦЕЛЫЕ ТИПЫ
+integer
+
+b.	ВЕЩЕСТВЕННЫЕ ТИПЫ
+Нету в этих правилах типа вещественного типа. Предлагаю добавить.
+real
+
+c.	СИМВОЛЬНЫЕ ТИПЫ
+Тоже нет такого. Добавляем.
+string
+
+d.	ЛОГИЧЕСКИЕ ТИПЫ
+boolean
+
+e.	ПЕРЕЧИСЛИМЫЕ ТИПЫ
+Тоже нет такого. Добавляем.
+Назовем unit или list
+
+Операторы
+------------------------------------------------------------------
+.      - обращение к члену класса
+#      - понятия не имею, что делает этот оператор
+* /
++ -
+<= < >= =
+==
+()         - по идее вызов метода с параметрами
+[]         - обращение к элементу массива
+{}         - пока ещё не понял зачем это, но мы это будем использовать в перечислении точно)
+<< >>      - чтение, запись
+::         - для класса всякие методы
+=
+
+Классы и подпрограммы
+------------------------------------------------------------------
+Пример (понятен до невозможности):
+
+class HelloWorld
+	public void HelloWorld();
+end HelloWorld
+
+method void HelloWorld::HelloWorld( ) is
+begin
+	output << "Hello, World!";
+end HelloWorld
+
+method void main() is
+begin
+	HelloWord helloObj;
+end
+
+Еще терминалы (помимо операторов, которое тоже вроде являются терминалами):
+------------------------------------------------------------------
+;
+,
+1 2 3 4 5 6 7 8 9 0 и все остальные цифры (это, как ты, наверное, говорил, будет A->A, где A - цифра)
+Соответственно, то же самое с символами
+ABCDEFGHIJKLMOPQRSTUVWXYZabcdefghijklmopqrstuvwxyz, которые так же на себя "зациклены"
+Еще надо будет продумать токен e - типа пустота
+И из правил я не понял, что там значит "id". Может, додумаешься..
+
+Нетерминалы
+------------------------------------------------------------------
+ACCESS SPEC
+ADDOP
+ALLOCATOR
+ARGLIST
+ASSIGNSTMT
+BEXPR
+BLOCK
+BODY
+CALLSTMT
+CAST EXPR
+CATCH CLAUSE
+CEXPR
+CLASS
+CLASS MEMBER
+ELSEPART
+EXPR
+FACTOR
+FIELD DECL
+IFSTMT
+ELSEPART
+INPUTSTMT
+LOOPSTMT
+MEMBER PART
+METHOD
+METHOD DECL
+METHOD ID
+M TYPE
+MULTOP
+OPTIONAL ID
+OPTIONAL TYPE ID
+OUPUTSTMT
+OUTPUTSTMT
+PARAMETER DECL
+PARAMETERS
+RELOP
+SIMPLEEXPR
+STMT
+STMTLIST
+SUPER INIT
+SUPER CLASS
+TERM
+THIS INIT
+TRYSTMT
+TYPE
+TYPE ID
+VALUE OR REF
+VARDECLIST
+VARDECS
+
+Еще, наверное, добавятся нетерминалы, но пока так...

@@ -1,0 +1,9 @@
+<<<<<<< HEAD
+Some text in this file, modified NOW!!!
+=======
+Some text in this file, MODIFIED!!!
+
+feature!!!!!
+
+now we are ready for release)
+>>>>>>> release/0.1
