@@ -236,7 +236,7 @@ namespace compiler
         }
 
         /// <summary>
-        /// Обработчик события нажатия на кнопку лексического и синтаксического анализа
+        /// Обработчик события нажатия на кнопку лексического анализа
         /// </summary>
         private void miLA_Click(object sender, RoutedEventArgs e)
         {
@@ -244,10 +244,33 @@ namespace compiler
             {
                 string code = (tc.SelectedItem as CoolTabItem).Code;
                 if (!String.IsNullOrEmpty(code))
+                {
+                    Results resForm = myParser.Parse(new StringReader(code))
+                        ? new Results(Results.AnalyseType.lexical, false, "", myParser.Root)
+                        : new Results(Results.AnalyseType.lexical, true, myParser.FailMessage, null);
+
+                    resForm.ShowDialog();
+                }
+                else
+                    MessageBox.Show("Empty code", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+                MessageBox.Show("No code for parsing", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        /// <summary>
+        /// Обработчик события нажатия на кнопку синтаксического анализа
+        /// </summary>
+        private void miSA_Click(object sender, RoutedEventArgs e)
+        {
+            if (tc.Items.Count > 0)
+            {
+                string code = (tc.SelectedItem as CoolTabItem).Code;
+                if (!String.IsNullOrEmpty(code))
                 {  //парсинг
                     Results resForm = myParser.Parse(new StringReader(code))
-                        ? new Results(false, "", myParser.Root)
-                        : new Results(true, myParser.FailMessage, null);
+                        ? new Results(Results.AnalyseType.syntax, false, "", myParser.Root)
+                        : new Results(Results.AnalyseType.syntax, true, myParser.FailMessage, null);
 
                     resForm.ShowDialog();
                 }

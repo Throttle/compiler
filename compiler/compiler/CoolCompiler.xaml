@@ -966,9 +966,10 @@
                     <MenuItem x:Name="miFormat" Header="Font..."/>
                 </MenuItem>
                 <MenuItem Header="Debug">
-                    <MenuItem x:Name="miLA" Header="Lexical and syntax analyse" Click="miLA_Click"/>
-                    <MenuItem x:Name="miCG" Header="Code Generation"/>
-                    <MenuItem x:Name="miCS" Header="Code Simulation"/>
+                    <MenuItem x:Name="miLA" Header="Lexical analyse" Click="miLA_Click"/>
+                    <MenuItem x:Name="miSA" Header="Syntax analyse" Click="miSA_Click"/>
+                    <MenuItem x:Name="miCG" Header="Code generation"/>
+                    <MenuItem x:Name="miCS" Header="Code simulation"/>
                 </MenuItem>
                 <MenuItem Header="Help">
                     <MenuItem Header="About"/>

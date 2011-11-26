@@ -13,76 +13,57 @@ using System.Windows.Shapes;
 
 namespace compiler.Dialogs
 {
-    /// <summary>
-    /// Interaction logic for Errors.xaml
-    /// </summary>
     public partial class Results : Window
     {
         private GOLD.Reduction _root;
+        public enum AnalyseType { lexical, syntax };
 
-        public Results(bool errors, string failMessage, GOLD.Reduction root)
+        public Results(AnalyseType analyser, bool errors, string failMessage, GOLD.Reduction root)
         {
             InitializeComponent();
 
+            this.Title = analyser == AnalyseType.lexical
+                ? "Lexical analyzer results"
+                : "Syntax analyzer results";
+
             if (errors)
-                ShowErrorMessage(failMessage);
+                txtTree.Text = String.Format("An error occured while trying to parse code.\n{0}", failMessage);
             else
             {
                 _root = root;
-                DrawParseTree();
-            }
-        }
 
-        private void ShowErrorMessage(string failMessage)
-        {
-            txtTree.Text = String.Format("An error occured while trying to parse code.\n{0}", failMessage);
-        }
-
-        private void DrawParseTree()
-        {
-            txtTree.Text = "No errors.\nThe parse tree is: \n\n";
-            DrawReductionTree();
-        }
-
-        private void DrawReductionTree()
-        {
-            StringBuilder tree = new StringBuilder();
-
-            tree.AppendLine("+-" + _root.Parent.Text(false));
-            DrawReduction(tree, _root, 1);
-
-            txtTree.Text += tree.ToString();
-        }
-
-        private void DrawReduction(StringBuilder tree, GOLD.Reduction reduction, int indent)
-        {
-            int n;
-            string indentText = "";
-
-            for (n = 1; n <= indent; n++)
-            {
-                indentText += "| ";
-            }
-
-            //=== Display the children of the reduction
-            for (n = 0; n < reduction.Count(); n++)
-            {
-                switch (reduction[n].Type())
+                switch (analyser)
                 {
-                    case GOLD.SymbolType.Nonterminal:
-                        GOLD.Reduction branch = (GOLD.Reduction)reduction[n].Data;
-
-                        tree.AppendLine(indentText + "+-" + branch.Parent.Text(false));
-                        DrawReduction(tree, branch, indent + 1);
+                    case (AnalyseType.lexical):
+                        ShowTokens();
                         break;
-
+                    case (AnalyseType.syntax):
+                        ShowParseTree();
+                        break;
                     default:
-                        string leaf = (string)reduction[n].Data;
-
-                        tree.AppendLine(indentText + "+-" + leaf);
                         break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Нарисовать дерево разбора
+        /// </summary>
+        private void ShowParseTree()
+        {
+            txtTree.Text = "No errors.\nThe parse tree is: \n\n";
+            SyntaxAnalyser mySyntaxAnalyser = new SyntaxAnalyser();
+            txtTree.Text += mySyntaxAnalyser.DrawReductionTree(_root);
+        }
+
+        /// <summary>
+        /// Показать найденные токены
+        /// </summary>
+        private void ShowTokens()
+        {
+            txtTree.Text = "No errors.\nFound tokens: \n\n";
+            LexicalAnalyser myLexicalAnalyser = new LexicalAnalyser();
+            txtTree.Text += myLexicalAnalyser.ShowTokens(_root);
         }
 
         private void btnClose_Click(object sender, RoutedEventArgs e)

@@ -59,6 +59,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Analyser\SyntaxAnalyser.cs" />
     <Compile Include="Controls\CoolTabItem.xaml.cs">
       <DependentUpon>CoolTabItem.xaml</DependentUpon>
     </Compile>
@@ -69,6 +70,7 @@
     <Compile Include="Dialogs\ExitDialogBox.xaml.cs">
       <DependentUpon>ExitDialogBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Analyser\LexicalAnalyser.cs" />
     <Compile Include="TabCode\RelayCommand.cs" />
     <Compile Include="TabCode\ScrollableTabPanel.cs" />
     <Page Include="Controls\CoolTabItem.xaml">
