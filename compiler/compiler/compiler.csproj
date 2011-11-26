@@ -36,6 +36,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AqiStar.TextEditor">
+      <HintPath>.\AqiStar.TextEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="AqiStar.TextEditor.Languages">
+      <HintPath>.\AqiStar.TextEditor.Languages.dll</HintPath>
+    </Reference>
+    <Reference Include="AqiStar.TextEditor.Wpf">
+      <HintPath>.\AqiStar.TextEditor.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="GOLD Engine">
       <HintPath>.\GOLD Engine.dll</HintPath>
     </Reference>
