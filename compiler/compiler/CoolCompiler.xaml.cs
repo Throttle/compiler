@@ -21,7 +21,6 @@ namespace compiler
     public partial class CoolCompiler : Window
     {
         private CoolParser myParser = new CoolParser();
-        private int _lastCountLines;
 
         public CoolCompiler()
         {
@@ -29,38 +28,8 @@ namespace compiler
             this.DataContext = this;
 
             LoadGrammarFile();
-
-            _lastCountLines = 0;
-            tc.KeyUp += new KeyEventHandler(tc_KeyUp);
         }
 
-        void tc_KeyUp(object sender, KeyEventArgs e)
-        {
-            int newCount = CountLinesInText((tc.SelectedItem as CoolTabItem).Code);
-
-            if (newCount != _lastCountLines)
-            {
-                _lastCountLines = newCount;
-                NumberLines();
-            }
-        }
-
-        private int CountLinesInText(string text)
-        {
-            int count = 1;
-            foreach (char c in text)
-                if (c == '\n') count++;
-
-            return count;
-        }
-
-        private void NumberLines()
-        {
-            txtNumeration.Text = "";
-            for (int i = 1; i <= _lastCountLines; i++)
-                txtNumeration.Text += String.Format("{0}\n", i);
-            txtNumeration.ScrollToEnd();
-        }
 
         private void LoadGrammarFile()
         {

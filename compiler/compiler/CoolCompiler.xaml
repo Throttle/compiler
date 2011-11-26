@@ -7,7 +7,7 @@
         xmlns:mwt="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         Title="Cool Compiler" 
         Height="600" 
-        Width="800" Closing="Window_Closing" Icon="/compiler;component/Images/programming.png">
+        Width="800" Closing="Window_Closing" Icon="/compiler;component/Images/programming.png" xmlns:my="clr-namespace:AqiStar.Controls.TextEditor.Wpf;assembly=AqiStar.TextEditor.Wpf" xmlns:my1="clr-namespace:AqiStar.Controls.TextEditor.Wpf.UI;assembly=AqiStar.TextEditor.Wpf" xmlns:my2="clr-namespace:AqiStar.Controls.TextEditor.Wpf.UI.Completion;assembly=AqiStar.TextEditor.Wpf" xmlns:my3="clr-namespace:AqiStar.Controls.TextEditor.Wpf.UI.Primitives;assembly=AqiStar.TextEditor.Wpf">
     <Window.Resources>
         <!-- 
          This color will be used to draw a border around the TabControl, on 
@@ -159,10 +159,10 @@
          also, the transition between two states will be animated using the Storyboards
          below.
       -->
-        <Thickness x:Key="TabItemMargin_Base">0,8,-4,0</Thickness>
-        <Thickness x:Key="TabItemMargin_Selected">-4,0,-4,0</Thickness>
-        <Thickness x:Key="TabItemMargin_Hover_Start">0,2,0,0</Thickness>
-        <Thickness x:Key="TabItemMargin_Hover_Final">0,4,0,0</Thickness>
+        <Thickness x:Key="TabItemMargin_Base">0,0,0,0</Thickness>
+        <Thickness x:Key="TabItemMargin_Selected">0,0,0,0</Thickness>
+        <Thickness x:Key="TabItemMargin_Hover_Start">0,0,0,0</Thickness>
+        <Thickness x:Key="TabItemMargin_Hover_Final">0,0,0,0</Thickness>
         <!-- The Margin for the ScrollableTabPanel (inside the ScrollViewer) -->
         <Thickness x:Key="TabPanel_Padding">4,0,4,0</Thickness>
         <!-- 
@@ -956,7 +956,7 @@
                 <MenuItem Header="File">
                     <MenuItem x:Name="miNew" Header="New" Click="miNew_Click" />
                     <MenuItem x:Name="miOpen" Header="Open" Click="miOpen_Click" />
-                    <!--<MenuItem x:Name="miClose" Header="Close" Click="miClose_Click" />-->
+                    <MenuItem x:Name="miClose" Header="Close" Click="miClose_Click" />
                     <MenuItem x:Name="miSave" Header="Save" Click="miSave_Click" />
                     <!--<MenuItem x:Name="miSaveAs" Header="Save As..."/>-->
                     <Separator/>
@@ -974,10 +974,10 @@
                     <MenuItem Header="About"/>
                 </MenuItem>
             </Menu>
-            <TabControl Grid.Row="1" Grid.Column="1" x:Name="tc" Margin="37,5,5,0" SelectedIndex="0"/>
+            <TabControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" x:Name="tc" Margin="5" SelectedIndex="0"/>
             <StatusBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
             </StatusBar>
-            <TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Hidden" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" Margin="0,49,0,0" Name="txtNumeration" VerticalAlignment="Stretch" Width="39" BorderBrush="#00000000" CaretBrush="#FF4A4AD4" TextAlignment="Right" Foreground="#FF4646D3" />
+            <!--<TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Hidden" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" Margin="0,49,0,0" Name="txtNumeration" VerticalAlignment="Stretch" Width="39" BorderBrush="#00000000" CaretBrush="#FF4A4AD4" TextAlignment="Right" Foreground="#FF4646D3" />-->
         </Grid>        
     </DockPanel>
 </Window>

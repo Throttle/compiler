@@ -20,13 +20,16 @@ namespace compiler.Controls
 
         public bool NeedToSave
         {
-            get { return this.OldCode != this.Code; }
+            get { return this.tbCode.Document.Buffer.ChangeTracking.IsDirty; }
         }
 
 
         public string Code
         {
-            get { return this.tbCode.Text; }
+            get 
+            {
+                return this.tbCode.Document.Buffer.CurrentSnapshot.GetText(); 
+            }
         }
 
 
@@ -52,9 +55,9 @@ namespace compiler.Controls
 
         private void LoadFromFile(string file_path)
         {
-            System.IO.TextReader tr = new System.IO.StreamReader(file_path);
-            this.tbCode.Text = tr.ReadToEnd();
-            tr.Close();
+            //System.IO.TextReader tr = new System.IO.StreamReader(file_path);
+            this.tbCode.Document = AqiStar.Controls.TextEditor.Text.Document.Load(file_path);// = tr.ReadToEnd();
+            //tr.Close();
 
             this.Header = System.IO.Path.GetFileName(file_path);
             this.backup = this.Code;
@@ -63,10 +66,7 @@ namespace compiler.Controls
 
         public void Save(string file_path)
         {
-            System.IO.TextWriter wr = new System.IO.StreamWriter(file_path);
-            wr.Write(this.Code);
-            wr.Close();
-
+            this.tbCode.Document.Save(file_path);
             this.Header = System.IO.Path.GetFileName(file_path);
             this.backup = this.Code;
         }
