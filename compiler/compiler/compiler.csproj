@@ -125,7 +125,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="Cool.egt">
+    <None Include="Data\Cool.egt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="app.config" />
@@ -140,6 +140,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\img_warning.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CoolCore\CoolCore.csproj">
+      <Project>{EDB1CCCB-F5A2-4FB2-9944-FDBA39C45EBA}</Project>
+      <Name>CoolCore</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

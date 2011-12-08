@@ -28,6 +28,13 @@ namespace compiler
             this.DataContext = this;
 
             LoadGrammarFile();
+            TestCoolCore();
+        }
+
+        private void TestCoolCore()
+        {
+            CoolCore.Language l = null;
+            l = CoolCore.Language.FromFile(@"./Data/Cool.egt");
         }
 
 
@@ -37,7 +44,7 @@ namespace compiler
             {
                 string pathToGrammarEGT = String.Format(@"{0}\{1}",
                                                  System.IO.Directory.GetCurrentDirectory(),
-                                                 "Cool.egt").Replace("\\", "/");
+                                                 "./Data/Cool.egt").Replace("\\", "/");
                 myParser.Setup(pathToGrammarEGT);
             }
             catch (Exception ex)
