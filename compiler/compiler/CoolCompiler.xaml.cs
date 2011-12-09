@@ -33,8 +33,13 @@ namespace compiler
 
         private void TestCoolCore()
         {
-            CoolCore.Language l = null;
-            l = CoolCore.Language.FromFile(@"./Data/Cool.egt");
+            CoolCore.Language language = null;
+            string pathToGrammarEGT = System.IO.Path.GetFullPath("./../../Data/Cool.egt");
+            string pathToExampleEGT = System.IO.Path.GetFullPath("./../../Data/example.cool");
+            language = CoolCore.Language.FromFile(pathToGrammarEGT);
+            CoolCore.Compiler.Scanner scanner = new CoolCore.Compiler.Scanner(pathToExampleEGT, language);
+            CoolCore.Compiler.Parser parser = new CoolCore.Compiler.Parser(scanner, language);
+            parser.CreateParseTree();
         }
 
 

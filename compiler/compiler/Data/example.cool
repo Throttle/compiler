@@ -1,0 +1,50 @@
+class Operations is
+    public integer _i, _j;
+    
+    public method integer Add();
+    public method integer Sub();
+    public method integer Mult();
+    public method integer Div();
+end Operations
+
+method void Operations::Add( ) is
+    declare integer res;
+begin
+    return _i + _j;
+end Add
+
+method void Operations::Sub( ) is
+    declare integer res;
+begin
+    return _i - _j;
+end Sub
+
+method void Operations::Mult( ) is
+    declare integer res;
+begin
+    return _i * _j;
+end Mult
+
+method void Operations::Div( ) is
+    declare integer res;
+begin
+    return _i / _j;
+end Div
+
+method void main() is
+    declare Operations myOper;
+    integer i, j;
+begin
+    input >> i;
+    input >> j;
+    
+    //создание экземпляра объекта
+    myOper = new Operations();
+    myOper._i = 10;
+    myOper._j = 5;
+    
+    output << myOper.Add();
+    output << myOper.Sub();
+    output << myOper.Mult();
+    output << myOper.Div();
+end main
