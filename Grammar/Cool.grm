@@ -18,10 +18,11 @@ CharLiteral      = '' ( {Char Ch} | '\'{Printable} )''
 ! Comments
 ! ======================================================
 
-    
-Comment Line = '//'
+Comment Block @= {Nesting = None, Advance = Character}
+               
 Comment Start = '/*'
-Comment End = '*/'
+Comment End   = '*/'
+Comment Line  = '//'
               
 !=======================================================
 ! Rules
@@ -29,6 +30,7 @@ Comment End = '*/'
 
 <PROGRAM> ::= <CLASS> <PROGRAM>
             | <METHOD> <PROGRAM>
+            |
            
 <ACCESS_SPEC> ::= private
                 | protected
@@ -224,10 +226,13 @@ Comment End = '*/'
 
 <VARDECLIST> ::= <TYPE> Id<TYPEEE>';'
               
-<TYPEEE> ::= ',' Id<TYPEEE>
+<TYPEEE> ::= ','Id<TYPEE>
            |
 
 !добавить уход в пустоту - попробовать)
 !добавил
-<VARDECS> ::= declare <VARDECLIST> <VARDECS>
+<VARDECS> ::= declare <VARDECLIST> <VARDECLISTT>
             |
+
+<VARDECLISTT> ::= <VARDECLIST> <VARDECLISTT>
+                 |

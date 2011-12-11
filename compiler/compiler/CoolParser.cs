@@ -144,7 +144,8 @@ public class CoolParser
             @Typeee = 128,                             // <TYPEEE>
             @Value_or_ref = 129,                       // <VALUE_OR_REF>
             @Vardeclist = 130,                         // <VARDECLIST>
-            @Vardecs = 131                             // <VARDECS>
+            @Vardeclistt = 131,                        // <VARDECLISTT>
+            @Vardecs = 132                             // <VARDECS>
         }
 
         private enum ProductionIndex
@@ -286,6 +287,7 @@ public class CoolParser
             @Vardeclistt = 134,                        // <VARDECLISTT> ::= <VARDECLIST> <VARDECLISTT>
             @Vardeclistt2 = 135                        // <VARDECLISTT> ::= 
         }
+
         //public object program;     //You might derive a specific object
 
         public bool Setup(string FilePath)
