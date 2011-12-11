@@ -38,7 +38,7 @@ begin
     input >> i;
     input >> j;
     
-    //создание экземпляра объекта
+    /*  asdasd */
     myOper = new Operations();
     myOper._i = 10;
     myOper._j = 5;

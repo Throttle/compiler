@@ -18,7 +18,8 @@ CharLiteral      = '' ( {Char Ch} | '\'{Printable} )''
 ! Comments
 ! ======================================================
 
-    
+Comment Block @= {Nesting = None, Advance = Character}
+               
 Comment Line = '//'
 Comment Start = '/*'
 Comment End = '*/'

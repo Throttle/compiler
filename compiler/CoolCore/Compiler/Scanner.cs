@@ -6,33 +6,45 @@ using System.IO;
 
 namespace CoolCore.Compiler
 {
+    /// <summary>
+    /// Класс реализующий работу лексера
+    /// </summary>
     public class Scanner
     {
+        // путь к файлу с исходным кодом
         private string m_Path;
+        // буффер куда производится чтение
         private char[] m_Buffer;
+        // позиция в буффере
         private int m_Cursor = -1;
+        // язык грамматики
         private Language m_Language;
+        // текущий столбец и строка
         private int m_Line = 0, m_Column = 0;
 
+        /// <summary>
+        /// Конструктор
+        /// </summary>
+        /// <param name="path">Полный путь к файлу с исходным кодом</param>
+        /// <param name="language">Язык используемой грамматики</param>
         public Scanner(string path, Language language)
         {
             if (!File.Exists(path))
                 throw new FileNotFoundException();
             if (language == null)
-                throw new ArgumentNullException("Language");
+                throw new ArgumentNullException("Language", "Параметр должен быть не null");
             m_Path = path;
             m_Language = language;
             StreamReader m_Reader = File.OpenText(path);
             m_Buffer = m_Reader.ReadToEnd().ToCharArray();
             m_Reader.Close();
-
             Reset();
         }
 
         /// <summary>
-        /// Peek at the next token.
+        /// Получить следующий токен.
         /// </summary>
-        /// <returns>The next token found.</returns>
+        /// <returns>Токен</returns>
         public Token PeekNextToken()
         {
             int save = m_Cursor;
@@ -61,19 +73,18 @@ namespace CoolCore.Compiler
 
             Token result = null;
 
-            //
-            // Retrieve one character at a time from the source input and walk through the DFA.
-            // when we enter an accepting state save it as the lastAcceptingState and keep walking.
-            // If we enter an error state (nextState == null) then return the lastAcceptingState, or
-            // a null token if the lastAcceptingState is never set.
-            //
+            // Производится посимвольное чтение входного файла и одновременный проход по КА
+            // Если в результате прохода обнаружилась выводимая цепочка терминалов (lastAcceptingState)
+            // сохраняем её. Таким образом получаем самую длинную выводимую цепочку.
+            // Если приходим в состояние ошибки (не можем никуда перейти) то lastAcceptingState - следующий токен
+            // иначе вернуть null
 
             while (true)
             {
-                // Don't advance the cursor.
+                // не передвигаем курсор
                 char nextChar = PeekNextChar();
 
-                // Return an EOF token.
+                // Если обнаружен конец файла EOF.
                 if (nextChar == (char)0 && (lastAcceptingState == null))
                 {
                     result = new Token(m_Language.Symbols[0]);
@@ -83,26 +94,30 @@ namespace CoolCore.Compiler
                 }
                 
 
-                // Get next state from current state on the next character.
+                // Получить следующее состояние из текущего по входному символу nextChar.
                 State nextState = currentState.Move(nextChar);
-                // If the next state is not an error state move to the next state.
+                
+                // Если следующее состояние существует (нет ошибки).
                 if (nextState != null)
                 {
-                    // Save accepting state if its accepting.
+                    // Если выводится цепочка терминалов - запоминаем
                     if (nextState.IsAccepting)
                     {
                         lastAcceptingState = nextState;
-                        tokenEnd = m_Cursor + 2;
+                        tokenEnd = m_Cursor + 2; // так как юникод
                     }
-                    // Move to the next state.
+
+                    // Переходим в следующее состояние
                     currentState = nextState;
-                    // Advance cursor.
+                    // Передвигаем курсор
                     nextChar = GetNextChar();
                 }
                 else
                 {
-                    // We have entered an error state. Thus either return the lastAcceptingState or
-                    // a null token.
+                    // Находимся в состоянии ошибки. 
+                    // Если определен lastAcceptingState - возвращаем его
+                    // иначе ошибка (null)
+
                     if (lastAcceptingState == null)
                     {
                         result = new Token(null);
@@ -124,7 +139,7 @@ namespace CoolCore.Compiler
         }
 
         /// <summary>
-        /// Resets the scanner.
+        /// Сброс сканера в начальное положение
         /// </summary>
         public void Reset()
         {
@@ -132,11 +147,22 @@ namespace CoolCore.Compiler
             m_Line = m_Column = 1;
         }
 
+        /// <summary>
+        /// Получить символ на позиции index из входного буфера
+        /// </summary>
+        /// <param name="index">позиция символа в буфере</param>
+        /// <returns>символ из входного файла, либо 0 в случае ошибки</returns>
         private char GetChar(int index)
         {
             return (index >= m_Buffer.Length) || (index < 0) ? (char)0 : m_Buffer[index];
         }
 
+
+        /// <summary>
+        /// Прочитать следующий значимый символ из входного потока
+        /// Курсор передвигается
+        /// </summary>
+        /// <returns>символ</returns>
         private char GetNextChar()
         {
             char nextChar = GetChar(++m_Cursor);
@@ -152,6 +178,10 @@ namespace CoolCore.Compiler
             return nextChar;
         }
 
+        /// <summary>
+        /// Предпросмотр следующего символа, без прочтения (курсор на месте)
+        /// </summary>
+        /// <returns>Следующий символ</returns>
         private char PeekNextChar()
         {
             return GetChar(m_Cursor + 1);
