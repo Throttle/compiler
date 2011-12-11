@@ -40,7 +40,6 @@ namespace compiler
             CoolCore.Compiler.Scanner scanner = new CoolCore.Compiler.Scanner(pathToExampleEGT, language);
             CoolCore.Compiler.Parser parser = new CoolCore.Compiler.Parser(scanner, language);
             CoolCore.Compiler.ParseTreeNode tree = parser.CreateParseTree();
-
         }
 
 

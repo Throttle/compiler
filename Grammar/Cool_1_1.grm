@@ -1,0 +1,222 @@
+"Name"    = 'Cool' 
+"Version" = '1.0'
+"Author"  = 'Dmitry Radchenko, Alexander Soulimov' 
+"About"   = 'The COOL Programming Language'
+
+"Case Sensitive" = True
+"Start Symbol"   = <PROGRAM>
+                 
+Id = [_]*{Letter}+{Digit}*
+Number = {Digit}+
+
+{String Ch}      = {Printable} - ["]
+{Char Ch}        = {Printable} - ['']
+StringLiteral    = '"'( {String Ch} | '\'{Printable} )* '"'
+CharLiteral      = '' ( {Char Ch} | '\'{Printable} )''
+                 
+! ======================================================
+! Comments
+! ======================================================
+
+Comment Block @= {Nesting = None, Advance = Character}
+               
+Comment Start = '/*'
+Comment End   = '*/'
+Comment Line  = '//'
+
+!!
+!! Global stuff. Module and body declaration.
+!!
+
+<PROGRAM>           ::= <CLASS> | <METHOD> 
+                    | <PROGRAM> <CLASS>
+                    | <PROGRAM> <METHOD>
+
+<BODY>              ::= <SUPER_INIT> <THIS_INIT> <BLOCK> 
+                    | <THIS_INIT> <BLOCK> 
+                    | <SUPER_INIT> <BLOCK>
+                    | <BLOCK>
+
+<THIS_INIT>         ::= this '(' <ARGLIST> ')'
+
+<SUPER_INIT>        ::= super '(' <ARGLIST> ')'
+
+<BLOCK>             ::= <VARDECS> begin <STATEMENTS> end | begin <STATEMENTS> end
+
+<VARDECLIST> ::= <TYPE> Id ';' | <TYPE> Id <VAR_TYPELIST>';'
+              
+<VAR_TYPELIST> ::= ',' Id | <VAR_TYPELIST> ',' Id 
+
+<VARDECS> ::= declare <VARDECLIST> | declare <VARDECLIST> <VARDECS>
+
+<NAME>              ::=  Id
+                    | <NAME> '.' Id
+
+
+!
+! EXPRESSIONS
+!
+
+<ASSIGNMENT>        ::=   <NAME> '=' <EXPRESSION>
+
+<FACTOR>            ::= this
+                    | super
+                    | Number
+                    | false
+                    | true
+                    | null
+                    | <ALLOCATOR>
+                    | <CAST_EXPR>
+
+<ALLOCATOR>         ::= new <TYPE> '(' <ARGLIST> ')'
+                    | new <TYPE> '(' ')'
+                    | new <TYPE> '[' <EXPRESSION> ']'
+
+<ARGLIST>           ::= <EXPRESSION>
+                    | <ARGLIST> ',' <EXPRESSION>
+            
+<CAST_EXPR> ::= cast '(' <TYPE> ',' <EXPRESSION> ')'
+                    
+                    
+<EXPRESSION>        ::= <EXPRESSION_TERM>
+                    | <EXPRESSION> '+' <EXPRESSION_TERM>
+                    | <EXPRESSION> '-' <EXPRESSION_TERM>
+                       
+<EXPRESSION_TERM>   ::= <EXPRESSION_FACTOR>
+                    | <EXPRESSION_TERM> '*' <EXPRESSION_FACTOR>
+                    | <EXPRESSION_TERM> '/' <EXPRESSION_FACTOR>
+
+
+<EXPRESSION_FACTOR> ::= <EXPRESSION_BINARY>
+                    | <EXPRESSION_FACTOR> '%' <EXPRESSION_BINARY>
+                    | <EXPRESSION_FACTOR> '>' <EXPRESSION_BINARY>
+                    | <EXPRESSION_FACTOR> '<' <EXPRESSION_BINARY>
+                    | <EXPRESSION_FACTOR> '>=' <EXPRESSION_BINARY>
+                    | <EXPRESSION_FACTOR> '<=' <EXPRESSION_BINARY>
+                    | <EXPRESSION_FACTOR> '==' <EXPRESSION_BINARY>
+                    | <EXPRESSION_FACTOR> '#' <EXPRESSION_BINARY>
+
+<EXPRESSION_BINARY> ::= <EXPRESSION_UNARY>
+                    | <EXPRESSION_BINARY> '&&' <EXPRESSION_UNARY>
+                    | <EXPRESSION_BINARY> '||' <EXPRESSION_UNARY>
+
+<EXPRESSION_UNARY>  ::= '+' <EXPRESSION_PRIMARY>
+                    | '-' <EXPRESSION_PRIMARY>
+                    | '!' <EXPRESSION_PRIMARY>
+                    | <EXPRESSION_PRIMARY> 
+                    | <EXPRESSION_PRIMARY> '[' <EXPRESSION> ']'
+                    | <EXPRESSION_PRIMARY> '(' <ARGLIST> ')'
+
+<EXPRESSION_PRIMARY>    ::= <NAME>
+                        | <FUNCTION_CALL>
+                        | <FACTOR>
+                        
+!!
+!! Statements
+!!
+
+<STATEMENTS>    ::=   <STATEMENT>
+                    | <STATEMENTS> <STATEMENT>
+
+<STATEMENT>     ::=   <BLOCK>
+                    | <METHOD>
+                    | <CLASS>
+                    | <FUNCTION_CALL> ';'
+                    | <ASSIGNMENT> ';'
+                    | <INPUTSTMT> ';'
+                    | <OUTPUTSTMT> ';'
+                    | return <EXPRESSION> ';'
+                    | return ';'
+                    | continue ';'
+                    | break ';'
+                    | <IFSTMT>
+                    | <TRYSTMT>
+                    | loop <STATEMENTS> end loop
+                    | exit ';'
+                    | throw <EXPRESSION> ';'
+
+<IFSTMT>            ::= if <EXPRESSION> then <STATEMENTS> end if
+                    |   if <EXPRESSION> then <STATEMENTS> <ELSEPART> end if
+                    |   if <EXPRESSION> then <STATEMENTS> <ELSEIF_PART> <ELSEPART> end if
+          
+<ELSEPART> ::= else <STATEMENTS>
+
+<ELSEIF_PART> ::= elsif <EXPRESSION> then <STATEMENTS> | elsif <EXPRESSION> then <STATEMENTS> <ELSEIF_PART>
+
+<TRYSTMT> ::= try <STATEMENTS> <CATCH_CLAUSE> end try
+
+<CATCH_CLAUSE> ::= catch '(' <TYPE> Id ')' <STATEMENTS> | catch '(' <TYPE> Id ')' <STATEMENTS> <CATCH_CLAUSE>
+
+<OUTPUTSTMT> ::= output '<<' <EXPRESSION>
+               | output '<<' StringLiteral
+               | output '<<' CharLiteral
+               
+<INPUTSTMT> ::= input '>>' <NAME>
+
+!! Types
+
+<TYPE>              ::=  <STRUCTURE_TYPE> 
+                    | <PRIMITIVE_TYPE>
+                    | <ARRAY_TYPE>
+         
+<PRIMITIVE_TYPE>    ::= integer
+                    | boolean
+          
+<STRUCTURE_TYPE>    ::= Id
+
+<ARRAY_TYPE>        ::= <STRUCTURE_TYPE> '[]'
+                    | <PRIMITIVE_TYPE> '[]'
+
+
+                    
+!!! Fields declaration
+
+<ACCESS_SPEC>       ::= private
+                    | protected
+                    | public
+              
+<FIELD_DECL> ::= <ACCESS_SPEC> <TYPE> <FIELD_DECLLIST>';'
+              
+<FIELD_DECLLIST> ::= Id | <FIELD_DECLLIST> ',' Id
+
+!!! Functions declaration
+
+!!
+!! Function stuff.
+!!
+
+<METHOD> ::= method <M_TYPE> <METHOD_ID>'('<PARAMETERS>')' is <BODY> Id 
+            | method <M_TYPE> <METHOD_ID> '(' ')' is <BODY> Id 
+
+<METHOD_DECL> ::= <ACCESS_SPEC> method <M_TYPE> Id '(' <PARAMETER_DECL> ')' ';'
+                | <ACCESS_SPEC> method <M_TYPE> Id '(' ')' ';'
+
+<METHOD_ID> ::= Id'::'Id
+              | Id
+
+<M_TYPE> ::= <TYPE>
+           | void
+
+<PARAMETERS>               ::= <TYPE> Id | <PARAMETERS> ',' <TYPE> Id
+
+                   
+<PARAMETER_DECL> ::= <TYPE> Id
+                    | <TYPE>
+                    | <PARAMETER_DECL> ',' <TYPE> Id
+                    | <PARAMETER_DECL> ',' <TYPE>
+
+
+<FUNCTION_CALL>     ::= call <NAME> '(' ')' 
+                    | call <NAME> '(' <ARGLIST> ')' 
+
+!!! CLASS declaration
+
+<CLASS> ::= class Id <SUPER_CLASS> is <CLASS_MEMBERLIST> end Id 
+        | class Id is <CLASS_MEMBERLIST> end Id 
+          
+<CLASS_MEMBERLIST> ::= <CLASS_MEMBER> | <CLASS_MEMBERLIST> <CLASS_MEMBER>
+
+<CLASS_MEMBER> ::= <FIELD_DECL>
+                 | <METHOD_DECL>
+
+<SUPER_CLASS> ::= extends Id

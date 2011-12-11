@@ -1,5 +1,0 @@
-C:\Users\Alexander\Desktop\study\compilers\compiler\compiler\CoolCore\bin\Debug\CoolCore.exe
-C:\Users\Alexander\Desktop\study\compilers\compiler\compiler\CoolCore\bin\Debug\CoolCore.pdb
-C:\Users\Alexander\Desktop\study\compilers\compiler\compiler\CoolCore\obj\Debug\ResolveAssemblyReference.cache
-C:\Users\Alexander\Desktop\study\compilers\compiler\compiler\CoolCore\obj\Debug\CoolCore.exe
-C:\Users\Alexander\Desktop\study\compilers\compiler\compiler\CoolCore\obj\Debug\CoolCore.pdb

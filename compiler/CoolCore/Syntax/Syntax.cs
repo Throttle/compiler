@@ -330,6 +330,7 @@ namespace CoolCore.Syntax
         public FunctionCollection Functions = null;
         public StructureCollection Structures = null;
         public StatementCollection Statements = null;
+        public VariableCollection Variables = null;
 
         public Compilation.SymbolTable SymbolTable = null;
 
@@ -337,7 +338,7 @@ namespace CoolCore.Syntax
         /// Создание тела модуля из коллекции утверждений
         /// Функции, переменные, структуры буду разделены
         /// </summary>
-        public Body(StatementCollection statements)
+        public Body(StatementCollection statements, VariableCollection variables)
         {
             if (statements == null)
                 return;
@@ -345,6 +346,7 @@ namespace CoolCore.Syntax
             Functions = new FunctionCollection();
             Structures = new StructureCollection();
             Statements = new StatementCollection();
+            Variables = new VariableCollection();
 
             foreach (Statement statement in statements)
             {
@@ -356,6 +358,14 @@ namespace CoolCore.Syntax
                     Structures.Add((Structure)statement);
                 else
                     Statements.Add(statement);
+            }
+
+            if (variables == null)
+                return;
+
+            foreach (Variable v in variables)
+            {
+                Variables.Add(v);
             }
         }
     }
@@ -721,14 +731,753 @@ namespace CoolCore.Syntax
         }
     }
 
+    
     public class Semantics
     {
+        private enum ProductionIndex
+        {
+            @Program = 0,							  // <PROGRAM> ::= <CLASS>
+            @Program2 = 1,							 // <PROGRAM> ::= <METHOD>
+            @Program3 = 2,							 // <PROGRAM> ::= <PROGRAM> <CLASS>
+            @Program4 = 3,							 // <PROGRAM> ::= <PROGRAM> <METHOD>
+            @Body = 4,								 // <BODY> ::= <SUPER_INIT> <THIS_INIT> <BLOCK>
+            @Body2 = 5,								// <BODY> ::= <THIS_INIT> <BLOCK>
+            @Body3 = 6,								// <BODY> ::= <SUPER_INIT> <BLOCK>
+            @Body4 = 7,								// <BODY> ::= <BLOCK>
+            @This_init_This_Lparan_Rparan = 8,		 // <THIS_INIT> ::= this '(' <ARGLIST> ')'
+            @Super_init_Super_Lparan_Rparan = 9,	   // <SUPER_INIT> ::= super '(' <ARGLIST> ')'
+            @Block_Begin_End = 10,					 // <BLOCK> ::= <VARDECS> begin <STATEMENTS> end
+            @Block_Begin_End2 = 11,					// <BLOCK> ::= begin <STATEMENTS> end
+            @Vardeclist_Id_Semi = 12,				  // <VARDECLIST> ::= <TYPE> Id ';'
+            @Vardeclist_Id_Semi2 = 13,				 // <VARDECLIST> ::= <TYPE> Id <VAR_TYPELIST> ';'
+            @Var_typelist_Comma_Id = 14,			   // <VAR_TYPELIST> ::= ',' Id
+            @Var_typelist_Comma_Id2 = 15,			  // <VAR_TYPELIST> ::= <VAR_TYPELIST> ',' Id
+            @Vardecs_Declare = 16,					 // <VARDECS> ::= declare <VARDECLIST>
+            @Vardecs_Declare2 = 17,					// <VARDECS> ::= declare <VARDECLIST> <VARDECS>
+            @Name_Id = 18,							 // <NAME> ::= Id
+            @Name_Dot_Id = 19,						 // <NAME> ::= <NAME> '.' Id
+            @Assignment_Eq = 20,					   // <ASSIGNMENT> ::= <NAME> '=' <EXPRESSION>
+            @Factor_This = 21,						 // <FACTOR> ::= this
+            @Factor_Super = 22,						// <FACTOR> ::= super
+            @Factor_Number = 23,					   // <FACTOR> ::= Number
+            @Factor_False = 24,						// <FACTOR> ::= false
+            @Factor_True = 25,						 // <FACTOR> ::= true
+            @Factor_Null = 26,						 // <FACTOR> ::= null
+            @Factor = 27,							  // <FACTOR> ::= <ALLOCATOR>
+            @Factor2 = 28,							 // <FACTOR> ::= <CAST_EXPR>
+            @Allocator_New_Lparan_Rparan = 29,		 // <ALLOCATOR> ::= new <TYPE> '(' <ARGLIST> ')'
+            @Allocator_New_Lparan_Rparan2 = 30,		// <ALLOCATOR> ::= new <TYPE> '(' ')'
+            @Allocator_New_Lbracket_Rbracket = 31,	 // <ALLOCATOR> ::= new <TYPE> '[' <EXPRESSION> ']'
+            @Arglist = 32,							 // <ARGLIST> ::= <EXPRESSION>
+            @Arglist_Comma = 33,					   // <ARGLIST> ::= <ARGLIST> ',' <EXPRESSION>
+            @Cast_expr_Cast_Lparan_Comma_Rparan = 34,  // <CAST_EXPR> ::= cast '(' <TYPE> ',' <EXPRESSION> ')'
+            @Expression = 35,						  // <EXPRESSION> ::= <EXPRESSION_TERM>
+            @Expression_Plus = 36,					 // <EXPRESSION> ::= <EXPRESSION> '+' <EXPRESSION_TERM>
+            @Expression_Minus = 37,					// <EXPRESSION> ::= <EXPRESSION> '-' <EXPRESSION_TERM>
+            @Expression_term = 38,					 // <EXPRESSION_TERM> ::= <EXPRESSION_FACTOR>
+            @Expression_term_Times = 39,			   // <EXPRESSION_TERM> ::= <EXPRESSION_TERM> '*' <EXPRESSION_FACTOR>
+            @Expression_term_Div = 40,				 // <EXPRESSION_TERM> ::= <EXPRESSION_TERM> '/' <EXPRESSION_FACTOR>
+            @Expression_factor = 41,				   // <EXPRESSION_FACTOR> ::= <EXPRESSION_BINARY>
+            @Expression_factor_Percent = 42,		   // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '%' <EXPRESSION_BINARY>
+            @Expression_factor_Gt = 43,				// <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '>' <EXPRESSION_BINARY>
+            @Expression_factor_Lt = 44,				// <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '<' <EXPRESSION_BINARY>
+            @Expression_factor_Gteq = 45,			  // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '>=' <EXPRESSION_BINARY>
+            @Expression_factor_Lteq = 46,			  // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '<=' <EXPRESSION_BINARY>
+            @Expression_factor_Eqeq = 47,			  // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '==' <EXPRESSION_BINARY>
+            @Expression_factor_Num = 48,			   // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '#' <EXPRESSION_BINARY>
+            @Expression_binary = 49,				   // <EXPRESSION_BINARY> ::= <EXPRESSION_UNARY>
+            @Expression_binary_Ampamp = 50,			// <EXPRESSION_BINARY> ::= <EXPRESSION_BINARY> '&&' <EXPRESSION_UNARY>
+            @Expression_binary_Pipepipe = 51,		  // <EXPRESSION_BINARY> ::= <EXPRESSION_BINARY> '||' <EXPRESSION_UNARY>
+            @Expression_unary_Plus = 52,			   // <EXPRESSION_UNARY> ::= '+' <EXPRESSION_PRIMARY>
+            @Expression_unary_Minus = 53,			  // <EXPRESSION_UNARY> ::= '-' <EXPRESSION_PRIMARY>
+            @Expression_unary_Exclam = 54,			 // <EXPRESSION_UNARY> ::= '!' <EXPRESSION_PRIMARY>
+            @Expression_unary = 55,					// <EXPRESSION_UNARY> ::= <EXPRESSION_PRIMARY>
+            @Expression_unary_Lbracket_Rbracket = 56,  // <EXPRESSION_UNARY> ::= <EXPRESSION_PRIMARY> '[' <EXPRESSION> ']'
+            @Expression_unary_Lparan_Rparan = 57,	  // <EXPRESSION_UNARY> ::= <EXPRESSION_PRIMARY> '(' <ARGLIST> ')'
+            @Expression_primary = 58,				  // <EXPRESSION_PRIMARY> ::= <NAME>
+            @Expression_primary2 = 59,				 // <EXPRESSION_PRIMARY> ::= <FUNCTION_CALL>
+            @Expression_primary3 = 60,				 // <EXPRESSION_PRIMARY> ::= <FACTOR>
+            @Statements = 61,						  // <STATEMENTS> ::= <STATEMENT>
+            @Statements2 = 62,						 // <STATEMENTS> ::= <STATEMENTS> <STATEMENT>
+            @Statement = 63,						   // <STATEMENT> ::= <BLOCK>
+            @Statement2 = 64,						  // <STATEMENT> ::= <METHOD>
+            @Statement3 = 65,						  // <STATEMENT> ::= <CLASS>
+            @Statement_Semi = 66,					  // <STATEMENT> ::= <FUNCTION_CALL> ';'
+            @Statement_Semi2 = 67,					 // <STATEMENT> ::= <ASSIGNMENT> ';'
+            @Statement_Semi3 = 68,					 // <STATEMENT> ::= <INPUTSTMT> ';'
+            @Statement_Semi4 = 69,					 // <STATEMENT> ::= <OUTPUTSTMT> ';'
+            @Statement_Return_Semi = 70,			   // <STATEMENT> ::= return <EXPRESSION> ';'
+            @Statement_Return_Semi2 = 71,			  // <STATEMENT> ::= return ';'
+            @Statement_Continue_Semi = 72,			 // <STATEMENT> ::= continue ';'
+            @Statement_Break_Semi = 73,				// <STATEMENT> ::= break ';'
+            @Statement4 = 74,						  // <STATEMENT> ::= <IFSTMT>
+            @Statement5 = 75,						  // <STATEMENT> ::= <TRYSTMT>
+            @Statement_Loop_End_Loop = 76,			 // <STATEMENT> ::= loop <STATEMENTS> end loop
+            @Statement_Exit_Semi = 77,				 // <STATEMENT> ::= exit ';'
+            @Statement_Throw_Semi = 78,				// <STATEMENT> ::= throw <EXPRESSION> ';'
+            @Ifstmt_If_Then_End_If = 79,			   // <IFSTMT> ::= if <EXPRESSION> then <STATEMENTS> end if
+            @Ifstmt_If_Then_End_If2 = 80,			  // <IFSTMT> ::= if <EXPRESSION> then <STATEMENTS> <ELSEPART> end if
+            @Ifstmt_If_Then_End_If3 = 81,			  // <IFSTMT> ::= if <EXPRESSION> then <STATEMENTS> <ELSEIF_PART> <ELSEPART> end if
+            @Elsepart_Else = 82,					   // <ELSEPART> ::= else <STATEMENTS>
+            @Elseif_part_Elsif_Then = 83,			  // <ELSEIF_PART> ::= elsif <EXPRESSION> then <STATEMENTS>
+            @Elseif_part_Elsif_Then2 = 84,			 // <ELSEIF_PART> ::= elsif <EXPRESSION> then <STATEMENTS> <ELSEIF_PART>
+            @Trystmt_Try_End_Try = 85,				 // <TRYSTMT> ::= try <STATEMENTS> <CATCH_CLAUSE> end try
+            @Catch_clause_Catch_Lparan_Id_Rparan = 86,  // <CATCH_CLAUSE> ::= catch '(' <TYPE> Id ')' <STATEMENTS>
+            @Catch_clause_Catch_Lparan_Id_Rparan2 = 87,  // <CATCH_CLAUSE> ::= catch '(' <TYPE> Id ')' <STATEMENTS> <CATCH_CLAUSE>
+            @Outputstmt_Output_Ltlt = 88,			  // <OUTPUTSTMT> ::= output '<<' <EXPRESSION>
+            @Outputstmt_Output_Ltlt_Stringliteral = 89,  // <OUTPUTSTMT> ::= output '<<' StringLiteral
+            @Outputstmt_Output_Ltlt_Charliteral = 90,  // <OUTPUTSTMT> ::= output '<<' CharLiteral
+            @Inputstmt_Input_Gtgt = 91,				// <INPUTSTMT> ::= input '>>' <NAME>
+            @Type = 92,								// <TYPE> ::= <STRUCTURE_TYPE>
+            @Type2 = 93,							   // <TYPE> ::= <PRIMITIVE_TYPE>
+            @Type3 = 94,							   // <TYPE> ::= <ARRAY_TYPE>
+            @Primitive_type_Integer = 95,			  // <PRIMITIVE_TYPE> ::= integer
+            @Primitive_type_Boolean = 96,			  // <PRIMITIVE_TYPE> ::= boolean
+            @Structure_type_Id = 97,				   // <STRUCTURE_TYPE> ::= Id
+            @Array_type_Lbracketrbracket = 98,		 // <ARRAY_TYPE> ::= <STRUCTURE_TYPE> '[]'
+            @Array_type_Lbracketrbracket2 = 99,		// <ARRAY_TYPE> ::= <PRIMITIVE_TYPE> '[]'
+            @Access_spec_Private = 100,				// <ACCESS_SPEC> ::= private
+            @Access_spec_Protected = 101,			  // <ACCESS_SPEC> ::= protected
+            @Access_spec_Public = 102,				 // <ACCESS_SPEC> ::= public
+            @Field_decl_Semi = 103,					// <FIELD_DECL> ::= <ACCESS_SPEC> <TYPE> <FIELD_DECLLIST> ';'
+            @Field_decllist_Id = 104,				  // <FIELD_DECLLIST> ::= Id
+            @Field_decllist_Comma_Id = 105,			// <FIELD_DECLLIST> ::= <FIELD_DECLLIST> ',' Id
+            @Method_Method_Lparan_Rparan_Is_Id = 106,  // <METHOD> ::= method <M_TYPE> <METHOD_ID> '(' <PARAMETERS> ')' is <BODY> Id
+            @Method_Method_Lparan_Rparan_Is_Id2 = 107,  // <METHOD> ::= method <M_TYPE> <METHOD_ID> '(' ')' is <BODY> Id
+            @Method_decl_Method_Id_Lparan_Rparan_Semi = 108,  // <METHOD_DECL> ::= <ACCESS_SPEC> method <M_TYPE> Id '(' <PARAMETER_DECL> ')' ';'
+            @Method_decl_Method_Id_Lparan_Rparan_Semi2 = 109,  // <METHOD_DECL> ::= <ACCESS_SPEC> method <M_TYPE> Id '(' ')' ';'
+            @Method_id_Id_Coloncolon_Id = 110,		 // <METHOD_ID> ::= Id '::' Id
+            @Method_id_Id = 111,					   // <METHOD_ID> ::= Id
+            @M_type = 112,							 // <M_TYPE> ::= <TYPE>
+            @M_type_Void = 113,						// <M_TYPE> ::= void
+            @Parameters_Id = 114,					  // <PARAMETERS> ::= <TYPE> Id
+            @Parameters_Comma_Id = 115,				// <PARAMETERS> ::= <PARAMETERS> ',' <TYPE> Id
+            @Parameter_decl_Id = 116,				  // <PARAMETER_DECL> ::= <TYPE> Id
+            @Parameter_decl = 117,					 // <PARAMETER_DECL> ::= <TYPE>
+            @Parameter_decl_Comma_Id = 118,			// <PARAMETER_DECL> ::= <PARAMETER_DECL> ',' <TYPE> Id
+            @Parameter_decl_Comma = 119,			   // <PARAMETER_DECL> ::= <PARAMETER_DECL> ',' <TYPE>
+            @Function_call_Call_Lparan_Rparan = 120,   // <FUNCTION_CALL> ::= call <NAME> '(' ')'
+            @Function_call_Call_Lparan_Rparan2 = 121,  // <FUNCTION_CALL> ::= call <NAME> '(' <ARGLIST> ')'
+            @Class_Class_Id_Is_End_Id = 122,		   // <CLASS> ::= class Id <SUPER_CLASS> is <CLASS_MEMBERLIST> end Id
+            @Class_Class_Id_Is_End_Id2 = 123,		  // <CLASS> ::= class Id is <CLASS_MEMBERLIST> end Id
+            @Class_memberlist = 124,				   // <CLASS_MEMBERLIST> ::= <CLASS_MEMBER>
+            @Class_memberlist2 = 125,				  // <CLASS_MEMBERLIST> ::= <CLASS_MEMBERLIST> <CLASS_MEMBER>
+            @Class_member = 126,					   // <CLASS_MEMBER> ::= <FIELD_DECL>
+            @Class_member2 = 127,					  // <CLASS_MEMBER> ::= <METHOD_DECL>
+            @Super_class_Extends_Id = 128			  // <SUPER_CLASS> ::= extends Id
+        }
+
         public static void Apply(Production production, SyntaxStack stack)
         {
             switch (production.m_ID)
             {
-                #region example
-                /*case 0: // <Literal> ::= boolean_literal
+                case (short)ProductionIndex.Program:
+                    // <PROGRAM> ::= <CLASS>
+                    break;
+
+                case (short)ProductionIndex.Program2:
+                    // <PROGRAM> ::= <METHOD>
+                    StatementCollection statements = new StatementCollection();
+                    statements.Add(stack.PopStatement());
+                    Body program_body = new Body(statements, null);
+                    stack.Push(new Module(program_body, "Main Program"));
+                    break;
+
+                case (short)ProductionIndex.Program3:
+                    // <PROGRAM> ::= <PROGRAM> <CLASS>
+                    break;
+
+                case (short)ProductionIndex.Program4:
+                    // <PROGRAM> ::= <PROGRAM> <METHOD>
+                    break;
+
+                case (short)ProductionIndex.Body:
+                    // <BODY> ::= <SUPER_INIT> <THIS_INIT> <BLOCK>
+                    break;
+
+                case (short)ProductionIndex.Body2:
+                    // <BODY> ::= <THIS_INIT> <BLOCK>
+                    break;
+
+                case (short)ProductionIndex.Body3:
+                    // <BODY> ::= <SUPER_INIT> <BLOCK>
+                    break;
+
+                case (short)ProductionIndex.Body4:
+                    // <BODY> ::= <BLOCK>
+                    // ничего
+                    break;
+
+                case (short)ProductionIndex.This_init_This_Lparan_Rparan:
+                    // <THIS_INIT> ::= this '(' <ARGLIST> ')'
+                    break;
+
+                case (short)ProductionIndex.Super_init_Super_Lparan_Rparan:
+                    // <SUPER_INIT> ::= super '(' <ARGLIST> ')'
+                    break;
+
+                case (short)ProductionIndex.Block_Begin_End:
+                    // <BLOCK> ::= <VARDECS> begin <STATEMENTS> end
+                    stack.Remove(0);
+                    stack.Remove(1);
+                    Body body = new Body((StatementCollection)stack.Pop(), (VariableCollection)stack.Pop());
+                    stack.Push(body);
+                    break;
+
+                case (short)ProductionIndex.Block_Begin_End2:
+                    // <BLOCK> ::= begin <STATEMENTS> end
+                    break;
+
+                case (short)ProductionIndex.Vardeclist_Id_Semi:
+                    // <VARDECLIST> ::= <TYPE> Id ';'
+                    break;
+
+                case (short)ProductionIndex.Vardeclist_Id_Semi2:
+                    // <VARDECLIST> ::= <TYPE> Id <VAR_TYPELIST> ';'
+                    // удалим из стека ";"
+                    stack.Pop();
+                    break;
+
+                case (short)ProductionIndex.Var_typelist_Comma_Id:
+                    // <VAR_TYPELIST> ::= ',' Id
+                    // ничего не делаем, пусть накапливаются
+                    break;
+
+                case (short)ProductionIndex.Var_typelist_Comma_Id2:
+                    // <VAR_TYPELIST> ::= <VAR_TYPELIST> ',' Id
+                    // последняя переменная типа
+                    List<object> variables = new List<object>();
+                    Type var_type = null;
+                    
+                    object topStack = stack.Pop();
+
+                    if (topStack is VariableCollection)
+                    {
+                        stack.Push(topStack);
+                        break;
+                    }
+
+                    while ((string)topStack != "declare")
+                    {
+                        if ((string)topStack != ",")
+                        {
+                            variables.Add(topStack);
+                        }
+
+                        topStack = stack.Pop();
+
+                        if (topStack is Type)
+                        {
+                            var_type = (Type)topStack;
+                            topStack = stack.Pop();
+                        }                        
+                    }
+
+                    stack.Push("declare");
+                    foreach (string var_name in variables)
+                    {
+                        stack.Push(new Variable(null, var_name, var_type));
+                    }
+                    variables.Clear();
+                    break;
+
+                case (short)ProductionIndex.Vardecs_Declare:
+                    // <VARDECS> ::= declare <VARDECLIST>
+                    VariableCollection var_collection = new VariableCollection();
+                    while (stack.Peek() is Variable)
+                    {
+                        var_collection.Add((Variable)stack.Pop());
+                    }
+                    stack.Pop(); // pop "declare"
+                    stack.Push(var_collection);
+                    break;
+
+                case (short)ProductionIndex.Vardecs_Declare2:
+                    // <VARDECS> ::= declare <VARDECLIST> <VARDECS>
+                    break;
+
+                case (short)ProductionIndex.Name_Id:
+                    // <NAME> ::= Id
+                    // ничего не делаем, идентификатор в стеке
+                    break;
+
+                case (short)ProductionIndex.Name_Dot_Id:
+                    // <NAME> ::= <NAME> '.' Id
+                    break;
+
+                case (short)ProductionIndex.Assignment_Eq:
+                    // <ASSIGNMENT> ::= <NAME> '=' <EXPRESSION>
+                    stack.Remove(1);
+                    stack.Push(new Assignment(stack.PopExpression(), null, stack.PopString()));
+                    break;
+
+                case (short)ProductionIndex.Factor_This:
+                    // <FACTOR> ::= this
+                    break;
+
+                case (short)ProductionIndex.Factor_Super:
+                    // <FACTOR> ::= super
+                    break;
+
+                case (short)ProductionIndex.Factor_Number:
+                    // <FACTOR> ::= Number
+                    stack.Push(new Literal(stack.PopString(), LiteralType.Integer));
+                    break;
+
+                case (short)ProductionIndex.Factor_False:
+                    // <FACTOR> ::= false
+                    break;
+
+                case (short)ProductionIndex.Factor_True:
+                    // <FACTOR> ::= true
+                    break;
+
+                case (short)ProductionIndex.Factor_Null:
+                    // <FACTOR> ::= null
+                    break;
+
+                case (short)ProductionIndex.Factor:
+                    // <FACTOR> ::= <ALLOCATOR>
+                    break;
+
+                case (short)ProductionIndex.Factor2:
+                    // <FACTOR> ::= <CAST_EXPR>
+                    break;
+
+                case (short)ProductionIndex.Allocator_New_Lparan_Rparan:
+                    // <ALLOCATOR> ::= new <TYPE> '(' <ARGLIST> ')'
+                    break;
+
+                case (short)ProductionIndex.Allocator_New_Lparan_Rparan2:
+                    // <ALLOCATOR> ::= new <TYPE> '(' ')'
+                    break;
+
+                case (short)ProductionIndex.Allocator_New_Lbracket_Rbracket:
+                    // <ALLOCATOR> ::= new <TYPE> '[' <EXPRESSION> ']'
+                    break;
+
+                case (short)ProductionIndex.Arglist:
+                    // <ARGLIST> ::= <EXPRESSION>
+                    break;
+
+                case (short)ProductionIndex.Arglist_Comma:
+                    // <ARGLIST> ::= <ARGLIST> ',' <EXPRESSION>
+                    break;
+
+                case (short)ProductionIndex.Cast_expr_Cast_Lparan_Comma_Rparan:
+                    // <CAST_EXPR> ::= cast '(' <TYPE> ',' <EXPRESSION> ')'
+                    break;
+
+                case (short)ProductionIndex.Expression:
+                    // <EXPRESSION> ::= <EXPRESSION_TERM>
+                    // ничего
+                    break;
+
+                case (short)ProductionIndex.Expression_Plus:
+                    // <EXPRESSION> ::= <EXPRESSION> '+' <EXPRESSION_TERM>
+                    break;
+
+                case (short)ProductionIndex.Expression_Minus:
+                    // <EXPRESSION> ::= <EXPRESSION> '-' <EXPRESSION_TERM>
+                    break;
+
+                case (short)ProductionIndex.Expression_term:
+                    // <EXPRESSION_TERM> ::= <EXPRESSION_FACTOR>
+                    // ничего
+                    break;
+
+                case (short)ProductionIndex.Expression_term_Times:
+                    // <EXPRESSION_TERM> ::= <EXPRESSION_TERM> '*' <EXPRESSION_FACTOR>
+                    break;
+
+                case (short)ProductionIndex.Expression_term_Div:
+                    // <EXPRESSION_TERM> ::= <EXPRESSION_TERM> '/' <EXPRESSION_FACTOR>
+                    break;
+
+                case (short)ProductionIndex.Expression_factor:
+                    // <EXPRESSION_FACTOR> ::= <EXPRESSION_BINARY>
+                    // ничего
+                    break;
+
+                case (short)ProductionIndex.Expression_factor_Percent:
+                    // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '%' <EXPRESSION_BINARY>
+                    break;
+
+                case (short)ProductionIndex.Expression_factor_Gt:
+                    // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '>' <EXPRESSION_BINARY>
+                    break;
+
+                case (short)ProductionIndex.Expression_factor_Lt:
+                    // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '<' <EXPRESSION_BINARY>
+                    break;
+
+                case (short)ProductionIndex.Expression_factor_Gteq:
+                    // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '>=' <EXPRESSION_BINARY>
+                    break;
+
+                case (short)ProductionIndex.Expression_factor_Lteq:
+                    // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '<=' <EXPRESSION_BINARY>
+                    break;
+
+                case (short)ProductionIndex.Expression_factor_Eqeq:
+                    // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '==' <EXPRESSION_BINARY>
+                    break;
+
+                case (short)ProductionIndex.Expression_factor_Num:
+                    // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '#' <EXPRESSION_BINARY>
+                    break;
+
+                case (short)ProductionIndex.Expression_binary:
+                    // <EXPRESSION_BINARY> ::= <EXPRESSION_UNARY>
+                    // ничего
+                    break;
+
+                case (short)ProductionIndex.Expression_binary_Ampamp:
+                    // <EXPRESSION_BINARY> ::= <EXPRESSION_BINARY> '&&' <EXPRESSION_UNARY>
+                    break;
+
+                case (short)ProductionIndex.Expression_binary_Pipepipe:
+                    // <EXPRESSION_BINARY> ::= <EXPRESSION_BINARY> '||' <EXPRESSION_UNARY>
+                    break;
+
+                case (short)ProductionIndex.Expression_unary_Plus:
+                    // <EXPRESSION_UNARY> ::= '+' <EXPRESSION_PRIMARY>
+                    break;
+
+                case (short)ProductionIndex.Expression_unary_Minus:
+                    // <EXPRESSION_UNARY> ::= '-' <EXPRESSION_PRIMARY>
+                    break;
+
+                case (short)ProductionIndex.Expression_unary_Exclam:
+                    // <EXPRESSION_UNARY> ::= '!' <EXPRESSION_PRIMARY>
+                    break;
+
+                case (short)ProductionIndex.Expression_unary:
+                    // <EXPRESSION_UNARY> ::= <EXPRESSION_PRIMARY>
+                    // ничего не делаем
+                    break;
+
+                case (short)ProductionIndex.Expression_unary_Lbracket_Rbracket:
+                    // <EXPRESSION_UNARY> ::= <EXPRESSION_PRIMARY> '[' <EXPRESSION> ']'
+                    break;
+
+                case (short)ProductionIndex.Expression_unary_Lparan_Rparan:
+                    // <EXPRESSION_UNARY> ::= <EXPRESSION_PRIMARY> '(' <ARGLIST> ')'
+                    break;
+
+                case (short)ProductionIndex.Expression_primary:
+                    // <EXPRESSION_PRIMARY> ::= <NAME>
+                    break;
+
+                case (short)ProductionIndex.Expression_primary2:
+                    // <EXPRESSION_PRIMARY> ::= <FUNCTION_CALL>
+                    break;
+
+                case (short)ProductionIndex.Expression_primary3:
+                    // <EXPRESSION_PRIMARY> ::= <FACTOR>
+                    // ничего не делаем
+                    break;
+
+                case (short)ProductionIndex.Statements:
+                    // <STATEMENTS> ::= <STATEMENT>
+                    stack.Push(new StatementCollection(stack.PopStatement()));
+                    break;
+
+                case (short)ProductionIndex.Statements2:
+                    // <STATEMENTS> ::= <STATEMENTS> <STATEMENT>
+                    Statement statement = stack.PopStatement();
+                    ((StatementCollection)stack.Peek()).Add(statement);
+                    break;
+
+                case (short)ProductionIndex.Statement:
+                    // <STATEMENT> ::= <BLOCK>
+                    break;
+
+                case (short)ProductionIndex.Statement2:
+                    // <STATEMENT> ::= <METHOD>
+                    break;
+
+                case (short)ProductionIndex.Statement3:
+                    // <STATEMENT> ::= <CLASS>
+                    break;
+
+                case (short)ProductionIndex.Statement_Semi:
+                    // <STATEMENT> ::= <FUNCTION_CALL> ';'
+                    break;
+
+                case (short)ProductionIndex.Statement_Semi2:
+                    // <STATEMENT> ::= <ASSIGNMENT> ';'
+                    // удаляем ";"
+                    stack.Pop(1);
+                    break;
+
+                case (short)ProductionIndex.Statement_Semi3:
+                    // <STATEMENT> ::= <INPUTSTMT> ';'
+                    break;
+
+                case (short)ProductionIndex.Statement_Semi4:
+                    // <STATEMENT> ::= <OUTPUTSTMT> ';'
+                    break;
+
+                case (short)ProductionIndex.Statement_Return_Semi:
+                    // <STATEMENT> ::= return <EXPRESSION> ';'
+                    break;
+
+                case (short)ProductionIndex.Statement_Return_Semi2:
+                    // <STATEMENT> ::= return ';'
+                    break;
+
+                case (short)ProductionIndex.Statement_Continue_Semi:
+                    // <STATEMENT> ::= continue ';'
+                    break;
+
+                case (short)ProductionIndex.Statement_Break_Semi:
+                    // <STATEMENT> ::= break ';'
+                    break;
+
+                case (short)ProductionIndex.Statement4:
+                    // <STATEMENT> ::= <IFSTMT>
+                    break;
+
+                case (short)ProductionIndex.Statement5:
+                    // <STATEMENT> ::= <TRYSTMT>
+                    break;
+
+                case (short)ProductionIndex.Statement_Loop_End_Loop:
+                    // <STATEMENT> ::= loop <STATEMENTS> end loop
+                    break;
+
+                case (short)ProductionIndex.Statement_Exit_Semi:
+                    // <STATEMENT> ::= exit ';'
+                    break;
+
+                case (short)ProductionIndex.Statement_Throw_Semi:
+                    // <STATEMENT> ::= throw <EXPRESSION> ';'
+                    break;
+
+                case (short)ProductionIndex.Ifstmt_If_Then_End_If:
+                    // <IFSTMT> ::= if <EXPRESSION> then <STATEMENTS> end if
+                    break;
+
+                case (short)ProductionIndex.Ifstmt_If_Then_End_If2:
+                    // <IFSTMT> ::= if <EXPRESSION> then <STATEMENTS> <ELSEPART> end if
+                    break;
+
+                case (short)ProductionIndex.Ifstmt_If_Then_End_If3:
+                    // <IFSTMT> ::= if <EXPRESSION> then <STATEMENTS> <ELSEIF_PART> <ELSEPART> end if
+                    break;
+
+                case (short)ProductionIndex.Elsepart_Else:
+                    // <ELSEPART> ::= else <STATEMENTS>
+                    break;
+
+                case (short)ProductionIndex.Elseif_part_Elsif_Then:
+                    // <ELSEIF_PART> ::= elsif <EXPRESSION> then <STATEMENTS>
+                    break;
+
+                case (short)ProductionIndex.Elseif_part_Elsif_Then2:
+                    // <ELSEIF_PART> ::= elsif <EXPRESSION> then <STATEMENTS> <ELSEIF_PART>
+                    break;
+
+                case (short)ProductionIndex.Trystmt_Try_End_Try:
+                    // <TRYSTMT> ::= try <STATEMENTS> <CATCH_CLAUSE> end try
+                    break;
+
+                case (short)ProductionIndex.Catch_clause_Catch_Lparan_Id_Rparan:
+                    // <CATCH_CLAUSE> ::= catch '(' <TYPE> Id ')' <STATEMENTS>
+                    break;
+
+                case (short)ProductionIndex.Catch_clause_Catch_Lparan_Id_Rparan2:
+                    // <CATCH_CLAUSE> ::= catch '(' <TYPE> Id ')' <STATEMENTS> <CATCH_CLAUSE>
+                    break;
+
+                case (short)ProductionIndex.Outputstmt_Output_Ltlt:
+                    // <OUTPUTSTMT> ::= output '<<' <EXPRESSION>
+                    break;
+
+                case (short)ProductionIndex.Outputstmt_Output_Ltlt_Stringliteral:
+                    // <OUTPUTSTMT> ::= output '<<' StringLiteral
+                    break;
+
+                case (short)ProductionIndex.Outputstmt_Output_Ltlt_Charliteral:
+                    // <OUTPUTSTMT> ::= output '<<' CharLiteral
+                    break;
+
+                case (short)ProductionIndex.Inputstmt_Input_Gtgt:
+                    // <INPUTSTMT> ::= input '>>' <NAME>
+                    break;
+
+                case (short)ProductionIndex.Type:
+                    // <TYPE> ::= <STRUCTURE_TYPE>
+                    break;
+
+                case (short)ProductionIndex.Type2:
+                    // <TYPE> ::= <PRIMITIVE_TYPE>
+                    // ничего н еделаем, тип стеке
+                    break;
+
+                case (short)ProductionIndex.Type3:
+                    // <TYPE> ::= <ARRAY_TYPE>
+                    break;
+
+                case (short)ProductionIndex.Primitive_type_Integer:
+                    // <PRIMITIVE_TYPE> ::= integer
+                    // Создаем тип объекта integer
+                    stack.Pop(1);
+                    stack.Push(new Type(PrimitiveType.Integer));
+                    break;
+
+                case (short)ProductionIndex.Primitive_type_Boolean:
+                    // <PRIMITIVE_TYPE> ::= boolean
+                    break;
+
+                case (short)ProductionIndex.Structure_type_Id:
+                    // <STRUCTURE_TYPE> ::= Id
+                    break;
+
+                case (short)ProductionIndex.Array_type_Lbracketrbracket:
+                    // <ARRAY_TYPE> ::= <STRUCTURE_TYPE> '[]'
+                    break;
+
+                case (short)ProductionIndex.Array_type_Lbracketrbracket2:
+                    // <ARRAY_TYPE> ::= <PRIMITIVE_TYPE> '[]'
+                    break;
+
+                case (short)ProductionIndex.Access_spec_Private:
+                    // <ACCESS_SPEC> ::= private
+                    break;
+
+                case (short)ProductionIndex.Access_spec_Protected:
+                    // <ACCESS_SPEC> ::= protected
+                    break;
+
+                case (short)ProductionIndex.Access_spec_Public:
+                    // <ACCESS_SPEC> ::= public
+                    break;
+
+                case (short)ProductionIndex.Field_decl_Semi:
+                    // <FIELD_DECL> ::= <ACCESS_SPEC> <TYPE> <FIELD_DECLLIST> ';'
+                    break;
+
+                case (short)ProductionIndex.Field_decllist_Id:
+                    // <FIELD_DECLLIST> ::= Id
+                    break;
+
+                case (short)ProductionIndex.Field_decllist_Comma_Id:
+                    // <FIELD_DECLLIST> ::= <FIELD_DECLLIST> ',' Id
+                    break;
+
+                case (short)ProductionIndex.Method_Method_Lparan_Rparan_Is_Id:
+                    // <METHOD> ::= method <M_TYPE> <METHOD_ID> '(' <PARAMETERS> ')' is <BODY> Id
+                    break;
+
+                case (short)ProductionIndex.Method_Method_Lparan_Rparan_Is_Id2:
+                    // <METHOD> ::= method <M_TYPE> <METHOD_ID> '(' ')' is <BODY> Id
+                    stack.Remove(2);
+                    stack.Remove(0);
+                    stack.Remove(1);
+                    stack.Remove(1);
+
+                    stack.Push(new Function(stack.PopBody(), null, stack.PopString(), stack.PopType()));
+                    stack.Remove(1);
+                    break;
+
+                case (short)ProductionIndex.Method_decl_Method_Id_Lparan_Rparan_Semi:
+                    // <METHOD_DECL> ::= <ACCESS_SPEC> method <M_TYPE> Id '(' <PARAMETER_DECL> ')' ';'
+                    break;
+
+                case (short)ProductionIndex.Method_decl_Method_Id_Lparan_Rparan_Semi2:
+                    // <METHOD_DECL> ::= <ACCESS_SPEC> method <M_TYPE> Id '(' ')' ';'
+                    break;
+
+                case (short)ProductionIndex.Method_id_Id_Coloncolon_Id:
+                    // <METHOD_ID> ::= Id '::' Id
+                    break;
+
+                case (short)ProductionIndex.Method_id_Id:
+                    // <METHOD_ID> ::= Id
+                    // ничего не делаем, идентификатор стеке
+                    break;
+
+                case (short)ProductionIndex.M_type:
+                    // <M_TYPE> ::= <TYPE>
+                    break;
+
+                case (short)ProductionIndex.M_type_Void:
+                    // <M_TYPE> ::= void
+                    // создаем тип объекта void
+                    stack.Pop(1);
+                    stack.Push(new Type(PrimitiveType.Void));
+                    break;
+
+                case (short)ProductionIndex.Parameters_Id:
+                    // <PARAMETERS> ::= <TYPE> Id
+                    break;
+
+                case (short)ProductionIndex.Parameters_Comma_Id:
+                    // <PARAMETERS> ::= <PARAMETERS> ',' <TYPE> Id
+                    break;
+
+                case (short)ProductionIndex.Parameter_decl_Id:
+                    // <PARAMETER_DECL> ::= <TYPE> Id
+                    break;
+
+                case (short)ProductionIndex.Parameter_decl:
+                    // <PARAMETER_DECL> ::= <TYPE>
+                    break;
+
+                case (short)ProductionIndex.Parameter_decl_Comma_Id:
+                    // <PARAMETER_DECL> ::= <PARAMETER_DECL> ',' <TYPE> Id
+                    break;
+
+                case (short)ProductionIndex.Parameter_decl_Comma:
+                    // <PARAMETER_DECL> ::= <PARAMETER_DECL> ',' <TYPE>
+                    break;
+
+                case (short)ProductionIndex.Function_call_Call_Lparan_Rparan:
+                    // <FUNCTION_CALL> ::= call <NAME> '(' ')'
+                    break;
+
+                case (short)ProductionIndex.Function_call_Call_Lparan_Rparan2:
+                    // <FUNCTION_CALL> ::= call <NAME> '(' <ARGLIST> ')'
+                    break;
+
+                case (short)ProductionIndex.Class_Class_Id_Is_End_Id:
+                    // <CLASS> ::= class Id <SUPER_CLASS> is <CLASS_MEMBERLIST> end Id
+                    break;
+
+                case (short)ProductionIndex.Class_Class_Id_Is_End_Id2:
+                    // <CLASS> ::= class Id is <CLASS_MEMBERLIST> end Id
+                    break;
+
+                case (short)ProductionIndex.Class_memberlist:
+                    // <CLASS_MEMBERLIST> ::= <CLASS_MEMBER>
+                    break;
+
+                case (short)ProductionIndex.Class_memberlist2:
+                    // <CLASS_MEMBERLIST> ::= <CLASS_MEMBERLIST> <CLASS_MEMBER>
+                    break;
+
+                case (short)ProductionIndex.Class_member:
+                    // <CLASS_MEMBER> ::= <FIELD_DECL>
+                    break;
+
+                case (short)ProductionIndex.Class_member2:
+                    // <CLASS_MEMBER> ::= <METHOD_DECL>
+                    break;
+
+                case (short)ProductionIndex.Super_class_Extends_Id:
+                    // <SUPER_CLASS> ::= extends Id
+                    break;
+
+            }  //switch
+
+            #region Старый вариант
+            #region example
+            /*switch (production.m_ID)
+            {
+                
+                case 0: // <Literal> ::= boolean_literal
                     // Create boolean literal object.
                     stack.Push(new Literal(stack.PopString(), LiteralType.Boolean));
                     break;
@@ -1143,7 +1892,8 @@ namespace CoolCore.Syntax
                     stack.Pop(1);
                     break;*/
                 #endregion
-
+            /*switch (production.m_ID)
+            {
                 case 0:     // <PROGRAM> ::= <CLASS> <PROGRAM>
                     break;
                 case 1:     // <PROGRAM> ::= <METHOD> <PROGRAM>
@@ -1160,18 +1910,18 @@ namespace CoolCore.Syntax
                     break;
                 case 7:     // <ADDOP> ::= '-'
                     break;
-                case 8:     // <ALLOCATOR> ::= new <TYPE_ID> '(' <ARGLIST> ')'
+                case 8:     // <ALLOCATOR> ::= new <TYPE> '(' <ARGLIST> ')'
                     break;
-                case 9:     // <ALLOCATOR> ::= new <TYPE_ID> '[' <EXPR> ']'
+                case 9:     // <ALLOCATOR> ::= new <TYPE> '[' <EXPR> ']'
                     break;
-                case 10:    // <ARGLIST> ::= <EXPRR>
+                case 10:    // <ARGLIST> ::= <EXPRLIST>
                     break;
                 case 11:    // <ARGLIST> ::= 
                     break;
-                case 12:    // <EXPRR> ::= <EXPR>
+                case 12:    // <EXPRLIST> ::= <EXPR>
                     break;
-                case 13:    // <EXPRR> ::= <EXPR> ',' <EXPRR>
-                    break; 
+                case 13:    // <EXPRLIST> ::= <EXPR> ',' <EXPRLIST>
+                    break;
                 case 14:    // <ASSIGNSTMT> ::= <FACTOR> '=' <EXPR>
                     break;
                 case 15:    // <BEXPR> ::= <SIMPLEEXPR>
@@ -1184,19 +1934,19 @@ namespace CoolCore.Syntax
                     break;
                 case 19:    // <CALLSTMT> ::= call <FACTOR>
                     break;
-                case 20:    // <CAST_EXPR> ::= cast '(' <TYPE_ID> ',' <EXPR> ')'
+                case 20:    // <CAST_EXPR> ::= cast '(' <TYPE> ',' <EXPR> ')'
                     break;
-                case 21:    // <CATCH_CLAUSE> ::= catch '(' <TYPE_ID> Id ')' <STMTLIST>
+                case 21:    // <CATCH_CLAUSE> ::= catch '(' <TYPE> Id ')' <STMTLIST>
                     break;
                 case 22:    // <CEXPR> ::= <BEXPR>
                     break;
                 case 23:    // <CEXPR> ::= <BEXPR> and <CEXPR>
                     break;
-                case 24:    // <CLASS> ::= class Id <SUPER_CLASS> is <CLASS_MEMBERR> end Id
+                case 24:    // <CLASS> ::= class Id <SUPER_CLASS> is <CLASS_MEMBERLIST> end Id
                     break;
-                case 25:    // <CLASS_MEMBERR> ::= <CLASS_MEMBER> <CLASS_MEMBERR>
+                case 25:    // <CLASS_MEMBERLIST> ::= <CLASS_MEMBER> <CLASS_MEMBERLIST>
                     break;
-                case 26:    // <CLASS_MEMBERR> ::= 
+                case 26:    // <CLASS_MEMBERLIST> ::= 
                     break;  
                 case 27:    // <CLASS_MEMBER> ::= <FIELD_DECL>
                     break;
@@ -1226,17 +1976,18 @@ namespace CoolCore.Syntax
                     break;
                 case 40:    // <FACTOR> ::= <CAST_EXPR>
                     break;
-                case 41:    // <FACTOR> ::= <VALUE_OR_REF> <MEMBER_PARTT>
+                case 41:    // <FACTOR> ::= <VALUE_OR_REF> <MEMBER_PARTLIST>
                     break;
-                case 42:    // <MEMBER_PARTT> ::= <MEMBER_PART> <MEMBER_PARTT>
+                case 42:    // <MEMBER_PARTLIST> ::= <MEMBER_PART> <MEMBER_PARTLIST>
                     break;
-                case 43:    // <MEMBER_PARTT> ::= 
+                case 43:    // <MEMBER_PARTLIST> ::= 
+                    // ничего не делаем
                     break;
-                case 44:    // <FIELD_DECL> ::= <ACCESS_SPEC> <TYPE> Id <FIELD_DECLL> ';'
+                case 44:    // <FIELD_DECL> ::= <ACCESS_SPEC> <TYPE> Id <FIELD_DECLLIST> ';'
                     break;
-                case 45:    // <FIELD_DECLL> ::= ',' Id <FIELD_DECLL>
+                case 45:    // <FIELD_DECLLIST> ::= ',' Id <FIELD_DECLLIST>
                     break;
-                case 46:    // <FIELD_DECLL> ::= 
+                case 46:    // <FIELD_DECLLIST> ::= 
                     break;
                 case 47:    // <IFSTMT> ::= if <EXPR> then <STMTLIST> <ELSEIF_PART> <ELSEPART> end if
                     break;
@@ -1265,6 +2016,9 @@ namespace CoolCore.Syntax
                 case 59:    // <M_TYPE> ::= <TYPE>
                     break;
                 case 60:    // <M_TYPE> ::= void
+                    // создаем тип объекта void
+                    stack.Pop(1);
+                    stack.Push(new Type(PrimitiveType.Void));
                     break;
                 case 61:    // <MULTOP> ::= '*'
                     break;
@@ -1294,13 +2048,15 @@ namespace CoolCore.Syntax
                     break;
                 case 74:    // <PARAMETER_DECLL> ::= 
                     break;
-                case 75:    // <PARAMETERS> ::= <TYPE> Id <TYPEE>
+                case 75:    // <PARAMETERS> ::= <TYPE> Id <PARAMETER_TYPELIST>
                     break;
                 case 76:    // <PARAMETERS> ::= 
+                    // create an empty collection of parameters
+                    stack.Push(new ParameterCollection());
                     break;
-                case 77:    // <TYPEE> ::= ',' <TYPE> Id <TYPEE>
+                case 77:    // <PARAMETER_TYPELIST> ::= ',' <TYPE> Id <PARAMETER_TYPELIST>
                     break;
-                case 78:    // <TYPEE> ::= 
+                case 78:    // <PARAMETER_TYPELIST> ::=  
                     break;
                 case 79:    // <RELOP> ::= '=='
                     break;
@@ -1359,200 +2115,115 @@ namespace CoolCore.Syntax
                 case 106:   // <SUPER_INIT> ::= super '(' <ARGLIST> ')'
                     break;
                 case 107:   // <SUPER_INIT> ::= 
+                    // ничего делать не надо
                     break;
                 case 108:   // <SUPER_CLASS> ::= extends Id
                     break;
                 case 109:   // <SUPER_CLASS> ::= 
                     break;
-                case 110:   // <TERM> ::= <FACTOR> <TERMM>
+                case 110:   // <TERM> ::= <FACTOR> <TERMLIST>
                     break;
-                case 111:   // <TERMM> ::= <MULTOP> <FACTOR> <TERMM>
+                case 111:   // <TERMLIST> ::= <MULTOP> <FACTOR> <TERMLIST>
                     break;
                 case 112:   // <TERMM> ::= 
                     break;
                 case 113:   // <THIS_INIT> ::= this '(' <ARGLIST> ')'
                     break;
                 case 114:   // <THIS_INIT> ::= 
+                    // ничего делать не надо
                     break;
                 case 115:   // <TRYSTMT> ::= try <STMTLIST> <CATCH_CLAUSE> <CATCH_CLAUSEE> end try
                     break;
                 case 116:   // <CATCH_CLAUSEE> ::= <CATCH_CLAUSE> <CATCH_CLAUSEE>
                     break;
-                case 117:   // <CATCH_CLAUSEE> ::= 
-                    break;  
-                case 118:   // <TYPE> ::= <TYPE_ID>
+                case 117:   // <CATCH_CLAUSEE> ::=  
                     break;
-                case 119:   // <TYPE> ::= <TYPE_ID> '[]'
+                case 118:   // <TYPE> ::= <Structure_Type>
+                    // ничего делать не надо
                     break;
-                case 120:   // <TYPE_ID> ::= integer
+                case 119:   // <TYPE> ::= <Primitive_Type>
+                    // ничего не делаем
                     break;
-                case 121:   // <TYPE_ID> ::= boolean
+                case 120:   // <TYPE> ::= <Array_Type>
                     break;
-                case 122:   // <TYPE_ID> ::= Id
+                case 121:   // <Primitive_Type> ::= integer
+                    // Создаем тип объекта integer
+                    stack.Pop(1);
+                    stack.Push(new Type(PrimitiveType.Integer));
                     break;
-                case 123:   // <VALUE_OR_REF> ::= this
+                case 122:   // <Primitive_Type> ::= boolean
                     break;
-                case 124:   // <VALUE_OR_REF> ::= super
+                case 123:   // <Structure_Type> ::= Id
                     break;
-                case 125:   // <VALUE_OR_REF> ::= Id
-                    break;  
-                case 126:   // <VALUE_OR_REF> ::= Id '[' <EXPR> ']'
+                case 124:   // <Array_Type> ::= <Structure_Type> '[]'
                     break;
-                case 127:   // <VALUE_OR_REF> ::= Id '(' <ARGLIST> ')'
+                case 125:   // <Array_Type> ::= <Primitive_Type> '[]'
                     break;
-                case 128:   // <VALUE_OR_REF> ::= '(' <EXPR> ')'
+                case 126:   // <VALUE_OR_REF> ::= this
                     break;
-                case 129:   // <VARDECLIST> ::= <TYPE> Id <TYPEEE> ';'
+                case 127:   // <VALUE_OR_REF> ::= super
                     break;
-                case 130:   // <TYPEEE> ::= ',' Id <TYPEE>
+                case 128:   // <VALUE_OR_REF> ::= Id
+                    // ничего не делаем, пусть идентификатор лежит в стеке
                     break;
-                case 131:   // <TYPEEE> ::= 
+                case 129:   // <VALUE_OR_REF> ::= Id '[' <EXPR> ']'
                     break;
-                case 132:   // <VARDECS> ::= declare <VARDECLIST> <VARDECLISTT>
+                case 130:   // <VALUE_OR_REF> ::= Id '(' <ARGLIST> ')'
                     break;
-                case 133:   // <VARDECS> ::= 
-                    break;  
-                case 134:   // <VARDECLISTT> ::= <VARDECLIST> <VARDECLISTT>
+                case 131:   // <VALUE_OR_REF> ::= '(' <EXPR> ')'
+                    // ничего делать не надо
                     break;
-                case 135:   // <VARDECLISTT> ::= 
+                case 132:   // <VARDECLIST> ::= <TYPE> Id <VAR_TYPELIST> ';'
+                    // удалим с вершины стека ";"
+                    stack.Pop();
+                    break;
+                case 133:   // <VAR_TYPELIST> ::= ',' Id <VAR_TYPELIST>
+                    List<object> variables = new List<object>();
+                    Type var_type = null;
+                    
+                    object topStack = stack.Pop();
+
+                    if (topStack is VariableCollection)
+                    {
+                        stack.Push(topStack);
+                        break;
+                    }
+
+                    while ((string)topStack != "declare")
+                    {
+                        if ((string)topStack != ",")
+                        {
+                            variables.Add(topStack);
+                        }
+
+                        topStack = stack.Pop();
+
+                        if (topStack is Type)
+                        {
+                            var_type = (Type)topStack;
+                            topStack = stack.Pop();
+                        }                        
+                    }
+
+                    VariableCollection var_collection = new VariableCollection();
+                    foreach (string var_name in variables)
+                    {
+                        var_collection.Add(new Variable(null, var_name, var_type));
+                    }
+                    stack.Push(var_collection);
+                    variables.Clear();
+                    break;
+                case 134:   // <VAR_TYPELIST> ::= 
+                    break;
+                case 135:   // <VARDECS> ::= declare <VARDECLIST> <VARDECS>
+                    // ничего не делаем VariableCollection могут быть много
+                    break;
+                case 136:   // <VARDECS> ::= 
+                    // ничего не делаем
                     break;
             }
-
-            //@Program3 = 2,                             
-            //@Access_spec_Private = 3,                  
-            //@Access_spec_Protected = 4,                // <ACCESS_SPEC> ::= protected
-            //@Access_spec_Public = 5,                   // <ACCESS_SPEC> ::= public
-            //@Addop_Plus = 6,                           // <ADDOP> ::= '+'
-            //@Addop_Minus = 7,                          // <ADDOP> ::= '-'
-            //@Allocator_New_Lparan_Rparan = 8,          // <ALLOCATOR> ::= new <TYPE_ID> '(' <ARGLIST> ')'
-            //@Allocator_New_Lbracket_Rbracket = 9,      // <ALLOCATOR> ::= new <TYPE_ID> '[' <EXPR> ']'
-            //@Arglist = 10,                             // <ARGLIST> ::= <EXPRR>
-            //@Arglist2 = 11,                            // <ARGLIST> ::= 
-            //@Exprr = 12,                               // <EXPRR> ::= <EXPR>
-            //@Exprr_Comma = 13,                         // <EXPRR> ::= <EXPR> ',' <EXPRR>
-            //@Assignstmt_Eq = 14,                       // <ASSIGNSTMT> ::= <FACTOR> '=' <EXPR>
-            //@Bexpr = 15,                               // <BEXPR> ::= <SIMPLEEXPR>
-            //@Bexpr2 = 16,                              // <BEXPR> ::= <SIMPLEEXPR> <RELOP> <SIMPLEEXPR>
-            //@Block_Begin_End = 17,                     // <BLOCK> ::= <VARDECS> begin <STMTLIST> end
-            //@Body = 18,                                // <BODY> ::= <SUPER_INIT> <THIS_INIT> <BLOCK>
-            //@Callstmt_Call = 19,                       // <CALLSTMT> ::= call <FACTOR>
-            //@Cast_expr_Cast_Lparan_Comma_Rparan = 20,  // <CAST_EXPR> ::= cast '(' <TYPE_ID> ',' <EXPR> ')'
-            //@Catch_clause_Catch_Lparan_Id_Rparan = 21,  // <CATCH_CLAUSE> ::= catch '(' <TYPE_ID> Id ')' <STMTLIST>
-            //@Cexpr = 22,                               // <CEXPR> ::= <BEXPR>
-            //@Cexpr_And = 23,                           // <CEXPR> ::= <BEXPR> and <CEXPR>
-            //@Class_Class_Id_Is_End_Id = 24,            // <CLASS> ::= class Id <SUPER_CLASS> is <CLASS_MEMBERR> end Id
-            //@Class_memberr = 25,                       // <CLASS_MEMBERR> ::= <CLASS_MEMBER> <CLASS_MEMBERR>
-            //@Class_memberr2 = 26,                      // <CLASS_MEMBERR> ::= 
-            //@Class_member = 27,                        // <CLASS_MEMBER> ::= <FIELD_DECL>
-            //@Class_member2 = 28,                       // <CLASS_MEMBER> ::= <METHOD_DECL>
-            //@Elsepart_Else = 29,                       // <ELSEPART> ::= else <STMTLIST>
-            //@Elsepart = 30,                            // <ELSEPART> ::= 
-            //@Expr = 31,                                // <EXPR> ::= <CEXPR>
-            //@Expr_Or = 32,                             // <EXPR> ::= <CEXPR> or <EXPR>
-            //@Factor_Minus = 33,                        // <FACTOR> ::= '-' <FACTOR>
-            //@Factor_Not = 34,                          // <FACTOR> ::= not <FACTOR>
-            //@Factor_Number = 35,                       // <FACTOR> ::= Number
-            //@Factor_False = 36,                        // <FACTOR> ::= false
-            //@Factor_True = 37,                         // <FACTOR> ::= true
-            //@Factor_Null = 38,                         // <FACTOR> ::= null
-            //@Factor = 39,                              // <FACTOR> ::= <ALLOCATOR>
-            //@Factor2 = 40,                             // <FACTOR> ::= <CAST_EXPR>
-            //@Factor3 = 41,                             // <FACTOR> ::= <VALUE_OR_REF> <MEMBER_PARTT>
-            //@Member_partt = 42,                        // <MEMBER_PARTT> ::= <MEMBER_PART> <MEMBER_PARTT>
-            //@Member_partt2 = 43,                       // <MEMBER_PARTT> ::= 
-            //@Field_decl_Id_Semi = 44,                  // <FIELD_DECL> ::= <ACCESS_SPEC> <TYPE> Id <FIELD_DECLL> ';'
-            //@Field_decll_Comma_Id = 45,                // <FIELD_DECLL> ::= ',' Id <FIELD_DECLL>
-            //@Field_decll = 46,                         // <FIELD_DECLL> ::= 
-            //@Ifstmt_If_Then_End_If = 47,               // <IFSTMT> ::= if <EXPR> then <STMTLIST> <ELSEIF_PART> <ELSEPART> end if
-            //@Elseif_part_Elsif_Then = 48,              // <ELSEIF_PART> ::= elsif <EXPR> then <STMTLIST> <ELSEIF_PART>
-            //@Elseif_part = 49,                         // <ELSEIF_PART> ::= 
-            //@Inputstmt_Input_Gtgt = 50,                // <INPUTSTMT> ::= input '>>' <FACTOR>
-            //@Loopstmt_Loop_End_Loop = 51,              // <LOOPSTMT> ::= loop <STMTLIST> end loop
-            //@Member_part_Dot_Id = 52,                  // <MEMBER_PART> ::= '.' Id
-            //@Member_part_Dot_Id_Lparan_Rparan = 53,    // <MEMBER_PART> ::= '.' Id '(' <ARGLIST> ')'
-            //@Member_part_Dot_Id_Lbracket_Rbracket = 54,  // <MEMBER_PART> ::= '.' Id '[' <EXPR> ']'
-            //@Method_Method_Lparan_Rparan_Is_Id = 55,   // <METHOD> ::= method <M_TYPE> <METHOD_ID> '(' <PARAMETERS> ')' is <BODY> Id
-            //@Method_decl_Method_Id_Lparan_Rparan_Semi = 56,  // <METHOD_DECL> ::= <ACCESS_SPEC> method <M_TYPE> Id '(' <PARAMETER_DECL> ')' ';'
-            //@Method_id_Id_Coloncolon_Id = 57,          // <METHOD_ID> ::= Id '::' Id
-            //@Method_id_Id = 58,                        // <METHOD_ID> ::= Id
-            //@M_type = 59,                              // <M_TYPE> ::= <TYPE>
-            //@M_type_Void = 60,                         // <M_TYPE> ::= void
-            //@Multop_Times = 61,                        // <MULTOP> ::= '*'
-            //@Multop_Div = 62,                          // <MULTOP> ::= '/'
-            //@Multop_Mod = 63,                          // <MULTOP> ::= mod
-            //@Optional_id_Id = 64,                      // <OPTIONAL_ID> ::= Id
-            //@Optional_id = 65,                         // <OPTIONAL_ID> ::= 
-            //@Outputstmt_Output_Ltlt = 66,              // <OUTPUTSTMT> ::= output '<<' <EXPR>
-            //@Outputstmt_Output_Ltlt2 = 67,             // <OUTPUTSTMT> ::= output '<<' <STRING_OR_CHAR>
-            //@String_or_char_Stringliteral = 68,        // <STRING_OR_CHAR> ::= StringLiteral
-            //@String_or_char_Charliteral = 69,          // <STRING_OR_CHAR> ::= CharLiteral
-            //@String_or_char = 70,                      // <STRING_OR_CHAR> ::= 
-            //@Parameter_decl = 71,                      // <PARAMETER_DECL> ::= <TYPE> <OPTIONAL_ID> <PARAMETER_DECLL>
-            //@Parameter_decl2 = 72,                     // <PARAMETER_DECL> ::= 
-            //@Parameter_decll_Comma = 73,               // <PARAMETER_DECLL> ::= ',' <TYPE> <OPTIONAL_ID> <PARAMETER_DECLL>
-            //@Parameter_decll = 74,                     // <PARAMETER_DECLL> ::= 
-            //@Parameters_Id = 75,                       // <PARAMETERS> ::= <TYPE> Id <TYPEE>
-            //@Parameters = 76,                          // <PARAMETERS> ::= 
-            //@Typee_Comma_Id = 77,                      // <TYPEE> ::= ',' <TYPE> Id <TYPEE>
-            //@Typee = 78,                               // <TYPEE> ::= 
-            //@Relop_Eqeq = 79,                          // <RELOP> ::= '=='
-            //@Relop_Lt = 80,                            // <RELOP> ::= '<'
-            //@Relop_Lteq = 81,                          // <RELOP> ::= '<='
-            //@Relop_Gt = 82,                            // <RELOP> ::= '>'
-            //@Relop_Gteq = 83,                          // <RELOP> ::= '>='
-            //@Relop_Num = 84,                           // <RELOP> ::= '#'
-            //@Simpleexpr = 85,                          // <SIMPLEEXPR> ::= <TERM> <SIMPLEEXPRR>
-            //@Simpleexprr = 86,                         // <SIMPLEEXPRR> ::= <ADDOP> <TERM> <SIMPLEEXPRR>
-            //@Simpleexprr2 = 87,                        // <SIMPLEEXPRR> ::= 
-            //@Stmt = 88,                                // <STMT> ::= <BLOCK>
-            //@Stmt2 = 89,                               // <STMT> ::= <TRYSTMT>
-            //@Stmt3 = 90,                               // <STMT> ::= <IFSTMT>
-            //@Stmt4 = 91,                               // <STMT> ::= <LOOPSTMT>
-            //@Stmt5 = 92,                               // <STMT> ::= <ASSIGNSTMT>
-            //@Stmt6 = 93,                               // <STMT> ::= <CALLSTMT>
-            //@Stmt7 = 94,                               // <STMT> ::= <OUTPUTSTMT>
-            //@Stmt8 = 95,                               // <STMT> ::= <INPUTSTMT>
-            //@Stmt_Continue = 96,                       // <STMT> ::= continue
-            //@Stmt_Break = 97,                          // <STMT> ::= break
-            //@Stmt_Return = 98,                         // <STMT> ::= return
-            //@Stmt_Return2 = 99,                        // <STMT> ::= return <EXPR>
-            //@Stmt_Exit = 100,                          // <STMT> ::= exit
-            //@Stmt_Throw = 101,                         // <STMT> ::= throw <EXPR>
-            //@Stmtlist_Semi = 102,                      // <STMTLIST> ::= <STMT> ';' <STMTLISTT>
-            //@Stmtlist = 103,                           // <STMTLIST> ::= 
-            //@Stmtlistt_Semi = 104,                     // <STMTLISTT> ::= <STMT> ';' <STMTLISTT>
-            //@Stmtlistt = 105,                          // <STMTLISTT> ::= 
-            //@Super_init_Super_Lparan_Rparan = 106,     // <SUPER_INIT> ::= super '(' <ARGLIST> ')'
-            //@Super_init = 107,                         // <SUPER_INIT> ::= 
-            //@Super_class_Extends_Id = 108,             // <SUPER_CLASS> ::= extends Id
-            //@Super_class = 109,                        // <SUPER_CLASS> ::= 
-            //@Term = 110,                               // <TERM> ::= <FACTOR> <TERMM>
-            //@Termm = 111,                              // <TERMM> ::= <MULTOP> <FACTOR> <TERMM>
-            //@Termm2 = 112,                             // <TERMM> ::= 
-            //@This_init_This_Lparan_Rparan = 113,       // <THIS_INIT> ::= this '(' <ARGLIST> ')'
-            //@This_init = 114,                          // <THIS_INIT> ::= 
-            //@Trystmt_Try_End_Try = 115,                // <TRYSTMT> ::= try <STMTLIST> <CATCH_CLAUSE> <CATCH_CLAUSEE> end try
-            //@Catch_clausee = 116,                      // <CATCH_CLAUSEE> ::= <CATCH_CLAUSE> <CATCH_CLAUSEE>
-            //@Catch_clausee2 = 117,                     // <CATCH_CLAUSEE> ::= 
-            //@Type = 118,                               // <TYPE> ::= <TYPE_ID>
-            //@Type_Lbracketrbracket = 119,              // <TYPE> ::= <TYPE_ID> '[]'
-            //@Type_id_Integer = 120,                    // <TYPE_ID> ::= integer
-            //@Type_id_Boolean = 121,                    // <TYPE_ID> ::= boolean
-            //@Type_id_Id = 122,                         // <TYPE_ID> ::= Id
-            //@Value_or_ref_This = 123,                  // <VALUE_OR_REF> ::= this
-            //@Value_or_ref_Super = 124,                 // <VALUE_OR_REF> ::= super
-            //@Value_or_ref_Id = 125,                    // <VALUE_OR_REF> ::= Id
-            //@Value_or_ref_Id_Lbracket_Rbracket = 126,  // <VALUE_OR_REF> ::= Id '[' <EXPR> ']'
-            //@Value_or_ref_Id_Lparan_Rparan = 127,      // <VALUE_OR_REF> ::= Id '(' <ARGLIST> ')'
-            //@Value_or_ref_Lparan_Rparan = 128,         // <VALUE_OR_REF> ::= '(' <EXPR> ')'
-            //@Vardeclist_Id_Semi = 129,                 // <VARDECLIST> ::= <TYPE> Id <TYPEEE> ';'
-            //@Typeee_Comma_Id = 130,                    // <TYPEEE> ::= ',' Id <TYPEE>
-            //@Typeee = 131,                             // <TYPEEE> ::= 
-            //@Vardecs_Declare = 132,                    // <VARDECS> ::= declare <VARDECLIST> <VARDECLISTT>
-            //@Vardecs = 133,                            // <VARDECS> ::= 
-            //@Vardeclistt = 134,                        // <VARDECLISTT> ::= <VARDECLIST> <VARDECLISTT>
-            //@Vardeclistt2 = 135                        // <VARDECLISTT> ::= 
-            //}
+            */
+            #endregion
         }
     }
 
