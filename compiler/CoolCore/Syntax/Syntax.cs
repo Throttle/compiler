@@ -123,6 +123,14 @@ namespace CoolCore
     }
 
 
+    public enum AccessLevel
+    {
+        al_private,
+        al_public,
+        al_protected
+    }
+
+
     /// <summary>
     /// Описывает тип
     /// </summary>
@@ -493,7 +501,10 @@ namespace CoolCore
         /// тип переменной
         /// </summary>
         public Type Type;
-
+        /// <summary>
+        /// уровень доступа
+        /// </summary>
+        public AccessLevel access_level;
         /// <summary>
         /// значение по умолчанию
         /// </summary>
@@ -502,9 +513,9 @@ namespace CoolCore
         /// <summary>
         /// конструктор
         /// </summary>
-        public Variable(object value, string name, Type type)
+        public Variable(object value, string name, Type type, AccessLevel acl = AccessLevel.al_public)
         {
-            Name = name; Type = type; Value = value;
+            Name = name; Type = type; Value = value; access_level = acl;
         }
     }
 
@@ -867,6 +878,7 @@ namespace CoolCore
             @Super_class_Extends_Id = 128			  // <SUPER_CLASS> ::= extends Id
         }
 
+        // !TODO: ОБРАБОТКА КЛАССОВ CLASS_MEMBER (тут access level) 
         public static void Apply(Production production, SyntaxStack stack)
         {
             switch (production.m_ID)
@@ -946,50 +958,54 @@ namespace CoolCore
                 case (short)ProductionIndex.Var_typelist_Comma_Id2:
                     // <VAR_TYPELIST> ::= <VAR_TYPELIST> ',' Id
                     // последняя переменная типа
-                    List<object> variables = new List<object>();
-                    Type var_type = null;
-                    
-                    object topStack = stack.Pop();
-
-                    if (topStack is VariableCollection)
                     {
-                        stack.Push(topStack);
-                        break;
-                    }
+                        List<object> variables = new List<object>();
+                        Type var_type = null;
 
-                    while ((string)topStack != "declare")
-                    {
-                        if ((string)topStack != ",")
+                        object topStack = stack.Pop();
+
+                        if (topStack is VariableCollection)
                         {
-                            variables.Add(topStack);
+                            stack.Push(topStack);
+                            break;
                         }
 
-                        topStack = stack.Pop();
-
-                        if (topStack is Type)
+                        while ((string)topStack != "declare")
                         {
-                            var_type = (Type)topStack;
-                            topStack = stack.Pop();
-                        }                        
-                    }
+                            if ((string)topStack != ",")
+                            {
+                                variables.Add(topStack);
+                            }
 
-                    stack.Push("declare");
-                    foreach (string var_name in variables)
-                    {
-                        stack.Push(new Variable(null, var_name, var_type));
+                            topStack = stack.Pop();
+
+                            if (topStack is Type)
+                            {
+                                var_type = (Type)topStack;
+                                topStack = stack.Pop();
+                            }
+                        }
+
+                        stack.Push("declare");
+                        foreach (string var_name in variables)
+                        {
+                            stack.Push(new Variable(null, var_name, var_type));
+                        }
+                        variables.Clear();
                     }
-                    variables.Clear();
                     break;
 
                 case (short)ProductionIndex.Vardecs_Declare:
                     // <VARDECS> ::= declare <VARDECLIST>
-                    VariableCollection var_collection = new VariableCollection();
-                    while (stack.Peek() is Variable)
                     {
-                        var_collection.Add((Variable)stack.Pop());
+                        VariableCollection var_collection = new VariableCollection();
+                        while (stack.Peek() is Variable)
+                        {
+                            var_collection.Add((Variable)stack.Pop());
+                        }
+                        stack.Pop(); // pop "declare"
+                        stack.Push(var_collection);
                     }
-                    stack.Pop(); // pop "declare"
-                    stack.Push(var_collection);
                     break;
 
                 case (short)ProductionIndex.Vardecs_Declare2:
@@ -1363,18 +1379,26 @@ namespace CoolCore
 
                 case (short)ProductionIndex.Access_spec_Private:
                     // <ACCESS_SPEC> ::= private
+                    stack.Pop();
+                    stack.Push(AccessLevel.al_private);
                     break;
 
                 case (short)ProductionIndex.Access_spec_Protected:
                     // <ACCESS_SPEC> ::= protected
+                    stack.Pop();
+                    stack.Push(AccessLevel.al_protected);
                     break;
 
                 case (short)ProductionIndex.Access_spec_Public:
                     // <ACCESS_SPEC> ::= public
+                    stack.Pop();
+                    stack.Push(AccessLevel.al_public);
                     break;
 
                 case (short)ProductionIndex.Field_decl_Semi:
                     // <FIELD_DECL> ::= <ACCESS_SPEC> <TYPE> <FIELD_DECLLIST> ';'
+                    stack.Pop(1);
+
                     break;
 
                 case (short)ProductionIndex.Field_decllist_Id:
@@ -1383,6 +1407,36 @@ namespace CoolCore
 
                 case (short)ProductionIndex.Field_decllist_Comma_Id:
                     // <FIELD_DECLLIST> ::= <FIELD_DECLLIST> ',' Id
+                    // последняя переменная типа
+                    {
+                        List<object> variables = new List<object>();
+                        Type var_type = null;
+                        object topStack = null;
+
+                        while (! (stack.Peek() is Type ))
+                        {
+                            topStack = stack.Pop();
+                            if ((string)topStack != ",")
+                            {
+                                variables.Add(topStack);
+                            }
+                        }
+
+                        var_type = stack.PopType();
+
+                        AccessLevel acl = AccessLevel.al_public;
+
+                        if (stack.Peek() is AccessLevel)
+                        {
+                            acl = (AccessLevel)stack.Pop();
+                        }
+
+                        foreach (string var_name in variables)
+                        {
+                            stack.Push(new Variable(null, var_name, var_type, acl));
+                        }
+                        variables.Clear();
+                    }
                     break;
 
                 case (short)ProductionIndex.Method_Method_Lparan_Rparan_Is_Id:
