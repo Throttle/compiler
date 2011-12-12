@@ -4,4 +4,7 @@ compiler/compiler/bin/
 compiler/compiler/obj/*
 compiler/compiler/obj/
 compiler/*.suo
-.gitignore
+compiler/CoolCore/bin/*
+compiler/CoolCore/obj/*
+*.pdb
+*.exe

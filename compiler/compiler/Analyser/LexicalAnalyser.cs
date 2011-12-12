@@ -36,7 +36,7 @@ namespace compiler
                     {
                         tokens += String.Format("Token \"{0}\"\n \tLine: {1}\n \tPosition: {2}\n \tValue: {3}\n\n",
                                                 tokensXmlReader.GetAttribute("type"),                   
-                                                tokensXmlReader.GetAttribute("line"),
+                                                Convert.ToString(Convert.ToInt32(tokensXmlReader.GetAttribute("line")) + 1),
                                                 tokensXmlReader.GetAttribute("position"),
                                                 tokensXmlReader.GetAttribute("value"));
                     }

@@ -28,6 +28,18 @@ namespace compiler
             this.DataContext = this;
 
             LoadGrammarFile();
+            TestCoolCore();
+        }
+
+        private void TestCoolCore()
+        {
+            CoolCore.Language language = null;
+            string pathToGrammarEGT = System.IO.Path.GetFullPath("./../../Data/Cool.egt");
+            string pathToExampleEGT = System.IO.Path.GetFullPath("./../../Data/example_inits.cool");
+            language = CoolCore.Language.FromFile(pathToGrammarEGT);
+            CoolCore.Compiler.Scanner scanner = new CoolCore.Compiler.Scanner(pathToExampleEGT, language);
+            CoolCore.Compiler.Parser parser = new CoolCore.Compiler.Parser(scanner, language);
+            CoolCore.Compiler.ParseTreeNode tree = parser.CreateParseTree();
         }
 
 
@@ -37,7 +49,7 @@ namespace compiler
             {
                 string pathToGrammarEGT = String.Format(@"{0}\{1}",
                                                  System.IO.Directory.GetCurrentDirectory(),
-                                                 "Cool.egt").Replace("\\", "/");
+                                                 "./Data/Cool.egt").Replace("\\", "/");
                 myParser.Setup(pathToGrammarEGT);
             }
             catch (Exception ex)
