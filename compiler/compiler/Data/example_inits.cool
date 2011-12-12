@@ -1,3 +1,22 @@
+class Operations is
+    public integer _i, _j;
+    public method integer Add();
+    public method integer Sub();
+end Operations
+
+method void Operations::Add( ) is
+    declare integer res;
+begin
+    return _i + _j;
+end Add
+
+method void Operations::Sub( ) is
+    declare integer res;
+begin
+    return _i - _j;
+end Sub
+
+
 method void main() is
     declare integer i, j, k;
 begin
