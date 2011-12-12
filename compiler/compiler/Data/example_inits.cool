@@ -1,0 +1,10 @@
+method void main() is
+    declare integer i, j, k;
+begin
+    input >> i;
+	input >> j;
+	input >> k;
+	output << i;
+	output << j;
+	output << k;
+end main
