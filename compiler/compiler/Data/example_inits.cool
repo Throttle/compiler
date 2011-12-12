@@ -1,7 +1,10 @@
 method void main() is
     declare integer i, j, k;
 begin
-    i = 5;
-	j = 6;
-	k = 7;
+    input >> i;
+	input >> j;
+	input >> k;
+	output << i;
+	output << j;
+	output << k;
 end main

@@ -5,7 +5,7 @@ using System.Text;
 using System.Collections;
 using System.Reflection.Emit;
 
-namespace CoolCore.Syntax
+namespace CoolCore
 {
     /// <summary>
     /// Стек для хранения семантической информации
@@ -1167,6 +1167,7 @@ namespace CoolCore.Syntax
 
                 case (short)ProductionIndex.Expression_primary:
                     // <EXPRESSION_PRIMARY> ::= <NAME>
+                    stack.Push(new Name(stack.PopString()));
                     break;
 
                 case (short)ProductionIndex.Expression_primary2:
@@ -1213,10 +1214,12 @@ namespace CoolCore.Syntax
 
                 case (short)ProductionIndex.Statement_Semi3:
                     // <STATEMENT> ::= <INPUTSTMT> ';'
+                    stack.Pop(1);
                     break;
 
                 case (short)ProductionIndex.Statement_Semi4:
                     // <STATEMENT> ::= <OUTPUTSTMT> ';'
+                    stack.Pop(1);
                     break;
 
                 case (short)ProductionIndex.Statement_Return_Semi:
@@ -1292,7 +1295,15 @@ namespace CoolCore.Syntax
                     break;
 
                 case (short)ProductionIndex.Outputstmt_Output_Ltlt:
-                    // <OUTPUTSTMT> ::= output '<<' <EXPRESSION>
+                    {
+                        // <OUTPUTSTMT> ::= output '<<' <EXPRESSION>
+                        stack.Remove(1);
+                        stack.Remove(1);
+                        ArgumentCollection args = new ArgumentCollection();
+                        args.Add(new Argument((Name)stack.Pop(), PassMethod.ByValue));
+                        Call call = new Call(args, "Write");
+                        stack.Push(new CallStatement(call.Arguments, call.Name));
+                    }
                     break;
 
                 case (short)ProductionIndex.Outputstmt_Output_Ltlt_Stringliteral:
@@ -1304,8 +1315,15 @@ namespace CoolCore.Syntax
                     break;
 
                 case (short)ProductionIndex.Inputstmt_Input_Gtgt:
-                    // <INPUTSTMT> ::= input '>>' <NAME>
+                    {
+                        // <INPUTSTMT> ::= input '>>' <NAME>
+                        stack.Remove(1);
+                        stack.Remove(1);
+
+                        stack.Push(new Assignment(new Call(null, "Read"), null, stack.PopString()));
+                    }
                     break;
+                    
 
                 case (short)ProductionIndex.Type:
                     // <TYPE> ::= <STRUCTURE_TYPE>

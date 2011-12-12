@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections;
-using CoolCore.Syntax;
+using CoolCore;
 
 namespace CoolCore.Compilation
 {
@@ -164,7 +164,7 @@ namespace CoolCore.Compilation
             }
         }
 
-        public CoolCore.Syntax.Type GetExpressionType(SymbolTable symbolTable, Expression expression)
+        public Type GetExpressionType(SymbolTable symbolTable, Expression expression)
         {
             if (expression is UnaryExpression)
             {
@@ -181,15 +181,15 @@ namespace CoolCore.Compilation
                 Literal literal = expression as Literal;
 
                 if (literal.LiteralType == LiteralType.Boolean)
-                    return new CoolCore.Syntax.Type(PrimitiveType.Boolean);
+                    return new Type(PrimitiveType.Boolean);
                 if (literal.LiteralType == LiteralType.Character)
-                    return new CoolCore.Syntax.Type(PrimitiveType.Character);
+                    return new Type(PrimitiveType.Character);
                 if (literal.LiteralType == LiteralType.Integer)
-                    return new CoolCore.Syntax.Type(PrimitiveType.Integer);
+                    return new Type(PrimitiveType.Integer);
                 if (literal.LiteralType == LiteralType.Real)
-                    return new CoolCore.Syntax.Type(PrimitiveType.Real);
+                    return new Type(PrimitiveType.Real);
                 if (literal.LiteralType == LiteralType.String)
-                    return new CoolCore.Syntax.Type(PrimitiveType.Void);
+                    return new Type(PrimitiveType.Void);
             }
             else if (expression is Name)
             {
@@ -202,7 +202,7 @@ namespace CoolCore.Compilation
             return null;
         }
 
-        public CoolCore.Syntax.Type FindType(CoolCore.Syntax.Type leftType, CoolCore.Syntax.Type rightType, BinaryOperatorType operatorType)
+        public Type FindType(Type leftType, Type rightType, BinaryOperatorType operatorType)
         {
             //
             // Binary operations can only be performed on primitive types.
@@ -222,7 +222,7 @@ namespace CoolCore.Compilation
                     case BinaryOperatorType.And:
                     case BinaryOperatorType.Or:
                     case BinaryOperatorType.NotEqual:
-                        return new CoolCore.Syntax.Type(PrimitiveType.Boolean);
+                        return new Type(PrimitiveType.Boolean);
                         break;
                     default:
                         throw new VerifierException("Specified operator cannot be applied to boolean types.");
@@ -248,10 +248,10 @@ namespace CoolCore.Compilation
                     case BinaryOperatorType.LessThen:
                     case BinaryOperatorType.Equal:
                     case BinaryOperatorType.NotEqual:
-                        return new CoolCore.Syntax.Type(PrimitiveType.Boolean);
+                        return new Type(PrimitiveType.Boolean);
                         break;
                     default:
-                        return new CoolCore.Syntax.Type(PrimitiveType.Integer);
+                        return new Type(PrimitiveType.Integer);
                 }
             }
 
@@ -268,7 +268,7 @@ namespace CoolCore.Compilation
                         throw new VerifierException("Specified operator cannot be applied to real types.");
                         break;
                     default:
-                        return new CoolCore.Syntax.Type(PrimitiveType.Real);
+                        return new Type(PrimitiveType.Real);
                 }
             }
 
@@ -285,34 +285,34 @@ namespace CoolCore.Compilation
                         throw new VerifierException("Specified operator cannot be applied to character types.");
                         break;
                     default:
-                        return new CoolCore.Syntax.Type(PrimitiveType.Character);
+                        return new Type(PrimitiveType.Character);
                 }
             }
 
             throw new VerifierException("Incompatible types for specified operation.");
         }
 
-        public CoolCore.Syntax.Type FindType(CoolCore.Syntax.Type type, UnaryOperatorType operatorType)
+        public Type FindType(Type type, UnaryOperatorType operatorType)
         {
             switch (operatorType)
             {
                 case UnaryOperatorType.Indexer:
                     if (type.VariableType == VariableType.PrimitiveArray)
-                        return new CoolCore.Syntax.Type(type.PrimitiveType);
+                        return new Type(type.PrimitiveType);
                     else if (type.VariableType == VariableType.StructureArray)
-                        return new CoolCore.Syntax.Type(type.Name);
+                        return new Type(type.Name);
                     else
                         throw new VerifierException("The indexer operator cannot be applied to the specified type.");
                     break;
                 case UnaryOperatorType.Not:
                     if (type.PrimitiveType == PrimitiveType.Boolean)
-                        return new CoolCore.Syntax.Type(type.PrimitiveType);
+                        return new Type(type.PrimitiveType);
                     else
                         throw new VerifierException("The NOT operator cannot be applied to the specified type.");
                     break;
                 default:
                     if (type.VariableType == VariableType.Primitive)
-                        return new CoolCore.Syntax.Type(type.PrimitiveType);
+                        return new Type(type.PrimitiveType);
                     else
                         throw new VerifierException("The +/- operators cannot be applied to the specified type.");
                     break;

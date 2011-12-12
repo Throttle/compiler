@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compilation\Generator.cs" />
     <Compile Include="Compilation\Verifier.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Syntax\Collections.cs" />
