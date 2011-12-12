@@ -28,7 +28,6 @@ namespace CoolCore
             if (File.Exists(path))
                 File.Delete(path);
 
-            // начнем компилировать
             generator.Compile(path);
         }
     }
