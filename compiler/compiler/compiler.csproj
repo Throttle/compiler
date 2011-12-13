@@ -130,6 +130,7 @@
     </None>
     <None Include="app.config" />
     <None Include="Data\example.cool" />
+    <None Include="Data\example_ifstmt.cool" />
     <None Include="Data\example_inits.cool" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

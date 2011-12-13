@@ -187,6 +187,9 @@ namespace CoolCore.Compilation
                         else if (literal.Value == "false")
                             il.Emit(OpCodes.Ldc_I4, 0);
                         break;
+                    case LiteralType.String:
+                        il.Emit(OpCodes.Ldstr, literal.Value);
+                        break;
                 }
             }
             else if (expression is Name)
@@ -765,8 +768,16 @@ namespace CoolCore.Compilation
                 }
                 else if (call.Name == "Write")
                 {
+                    //if (call.Arguments[0].Value is Literal)
+                    //{
+                    //    if ((call.Arguments[0].Value as Literal).LiteralType == LiteralType.String)
+                    //    {
+                    //        il.Emit(OpCodes.Ldstr, (call.Arguments[0].Value as Literal).Value);
+                    //    }
+                    //}
+
                     EmitExpression(il, call.Arguments[0].Value, symbolTable);
-                    MethodInfo write = System.Type.GetType("System.Console").GetMethod("WriteLine", new System.Type[] { typeof(int) });
+                    MethodInfo write = System.Type.GetType("System.Console").GetMethod("WriteLine");//, new System.Type[] { typeof(int) });
                     il.EmitCall(OpCodes.Call, write, null);
                 }
                 else
@@ -892,7 +903,36 @@ namespace CoolCore.Compilation
                 else if (call.Name == "Write")
                 {
                     EmitExpression(il, call.Arguments[0].Value, symbolTable);
-                    MethodInfo write = System.Type.GetType("System.Console").GetMethod("WriteLine", new System.Type[] { typeof(int) });
+                    MethodInfo write = null;
+
+                    if (call.Arguments[0].Value is Literal)
+                    {
+                        Literal temp = call.Arguments[0].Value as Literal;
+                        System.Type type = null;
+                        switch (temp.LiteralType)
+                        {
+                            case LiteralType.Boolean:
+                                type = typeof(bool);
+                                break;
+                            case LiteralType.Character:
+                                type = typeof(char);
+                                break;
+                            case LiteralType.Integer:
+                                type = typeof(int);
+                                break;
+                            case LiteralType.Real:
+                                type = typeof(double);
+                                break;
+                            case LiteralType.String:
+                                type = typeof(string);
+                                break;
+                        }
+                        write = System.Type.GetType("System.Console").GetMethod("WriteLine", new System.Type[] { type });
+                    }
+                    else
+                    {
+                        write = System.Type.GetType("System.Console").GetMethod("WriteLine", new System.Type[] { typeof(int) });
+                    }
                     il.EmitCall(OpCodes.Call, write, null);
                 }
                 else
