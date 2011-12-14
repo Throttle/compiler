@@ -132,6 +132,7 @@
     <None Include="Data\example.cool" />
     <None Include="Data\example_ifstmt.cool" />
     <None Include="Data\example_inits.cool" />
+    <None Include="Data\example_loop.cool" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

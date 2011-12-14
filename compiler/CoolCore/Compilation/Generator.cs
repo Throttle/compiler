@@ -9,6 +9,9 @@ namespace CoolCore.Compilation
     {
         private Module m_Module = null;
         private SymbolTable m_Globals = null;
+        private Label begin_block = new Label();
+        private Label end_block = new Label();
+
 
         public Generator(Module module)
         {
@@ -323,7 +326,7 @@ namespace CoolCore.Compilation
 
         }
 
-        private void EmitBody(ILGenerator il, Body body, bool root)
+        private void EmitBody(ILGenerator il, Body body, bool root, object additional_param = null)
         {
             //
             // Declare local variables.
@@ -551,12 +554,14 @@ namespace CoolCore.Compilation
                     While whileStatement = statement as While;
                     whileStatement.Body.SymbolTable = new SymbolTable(body.SymbolTable);
                     Label begin = il.DefineLabel();
+                    begin_block = begin;
                     Label exit = il.DefineLabel();
+                    end_block = exit;
                     il.MarkLabel(begin);
                     // Eval condition
                     EmitExpression(il, whileStatement.Condition, body.SymbolTable);
                     il.Emit(OpCodes.Brfalse, exit);
-                    EmitBody(il, whileStatement.Body, false);
+                    EmitBody(il, whileStatement.Body, false, new Label[]{begin, exit});
                     il.Emit(OpCodes.Br, begin);
                     il.MarkLabel(exit);
 
@@ -600,6 +605,14 @@ namespace CoolCore.Compilation
                     EmitAssignment(il, forStatement.Counter, body.SymbolTable);
                     il.Emit(OpCodes.Br, loop);
                     il.MarkLabel(exit);
+                }
+                else if (statement is Break)
+                {
+                    il.Emit(OpCodes.Br, end_block);
+                }
+                else if (statement is Continue)
+                {
+                    il.Emit(OpCodes.Br, begin_block);
                 }
 
             }

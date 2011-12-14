@@ -1,0 +1,19 @@
+﻿method void main() is
+    declare integer i, j;
+	declare integer k, m;
+begin
+	i = 777;
+    loop
+		input >> i;
+
+		if i == 1 then
+			continue;
+		elsif i == 0 then
+			break;
+		else
+			output << i;
+		end if	
+			
+	end loop
+	output << "End";
+end main

@@ -702,6 +702,44 @@ namespace CoolCore
     }
 
     /// <summary>
+    /// Описывает break
+    /// </summary>
+    public class Break : Statement
+    {
+        /// <summary>
+        /// возвращаемое значение
+        /// </summary>
+        public Expression Value;
+        /// <summary>
+        /// Конструктор
+        /// </summary>
+        /// <param name="value"></param>
+        public Break(Expression value)
+        {
+            Value = value;
+        }
+    }
+
+    /// <summary>
+    /// Описывает continue
+    /// </summary>
+    public class Continue : Statement
+    {
+        /// <summary>
+        /// возвращаемое значение
+        /// </summary>
+        public Expression Value;
+        /// <summary>
+        /// Конструктор
+        /// </summary>
+        /// <param name="value"></param>
+        public Continue(Expression value)
+        {
+            Value = value;
+        }
+    }
+
+    /// <summary>
     /// Описывает if конструкцию
     /// </summary>
     public class If : Statement
@@ -1049,28 +1087,6 @@ namespace CoolCore
 
                 case (short)ProductionIndex.Vardecs_Declare:
                     // <VARDECS> ::= declare <VARDECLIST>
-                    //{
-                    //    VariableCollection var_collection = new VariableCollection();
-                    //    List<string> variables = new List<string>(); 
-                    //    while (stack.Peek() is string)
-                    //    {
-                    //        if ((string)stack.Peek() == ",")
-                    //        {
-                    //            stack.Pop();
-                    //        }
-                    //        else
-                    //        {
-                    //            variables.Add(stack.PopString());
-                    //        }
-                    //    }
-
-                        
-                    //    stack.Push(var_collection);
-                    //}
-                    break;
-
-                case (short)ProductionIndex.Vardecs_Declare2:
-                    // <VARDECS> ::= declare <VARDECLIST> <VARDECS>
                     {
                         VariableCollection var_collection = new VariableCollection();
                         while (stack.Peek() is Variable)
@@ -1078,6 +1094,18 @@ namespace CoolCore
                             var_collection.Add((Variable)stack.Pop());
                         }
                         stack.Push(var_collection);
+                    }
+                    break;
+
+                case (short)ProductionIndex.Vardecs_Declare2:
+                    // <VARDECS> ::= declare <VARDECLIST> <VARDECS>
+                    {
+                        //VariableCollection var_collection = new VariableCollection();
+                        //while (stack.Peek() is Variable)
+                        //{
+                        //    var_collection.Add((Variable)stack.Pop());
+                        //}
+                        //stack.Push(var_collection);
                     }
                     break;
 
@@ -1349,10 +1377,14 @@ namespace CoolCore
 
                 case (short)ProductionIndex.Statement_Continue_Semi:
                     // <STATEMENT> ::= continue ';'
+                    stack.Pop(2);
+                    stack.Push(new Continue(null));
                     break;
 
                 case (short)ProductionIndex.Statement_Break_Semi:
                     // <STATEMENT> ::= break ';'
+                    stack.Pop(2);
+                    stack.Push(new Break(null));
                     break;
 
                 case (short)ProductionIndex.Statement4:
@@ -1365,6 +1397,13 @@ namespace CoolCore
 
                 case (short)ProductionIndex.Statement_Loop_End_Loop:
                     // <STATEMENT> ::= loop <STATEMENTS> end loop
+                    {
+                        stack.Pop(2); // end, loop
+                        // создадим бесконечный цикл
+                        BinaryExpression be = new BinaryExpression(new Literal("1", LiteralType.String), new Literal("1", LiteralType.String), BinaryOperatorType.Equal);
+                        stack.Remove(1); // loop
+                        stack.Push(new While(new Body((StatementCollection)stack.Pop(), null), be));
+                    }
                     break;
 
                 case (short)ProductionIndex.Statement_Exit_Semi:
@@ -1375,6 +1414,7 @@ namespace CoolCore
                     // <STATEMENT> ::= throw <EXPRESSION> ';'
                     break;
 
+                #region ==> If statements
                 case (short)ProductionIndex.Ifstmt_If_Then_End_If:
                     // <IFSTMT> ::= if <EXPRESSION> then <STATEMENTS> end if
                     stack.Pop(2);
@@ -1412,11 +1452,6 @@ namespace CoolCore
                             elseBody = new Body(new StatementCollection((If)stack.Pop()), null);
                         }
 
-                        //If topIf = (If)stack.Pop();
-                        //topIf.ElseBody = elseBody;
-
-                        //elseBody = new Body(new StatementCollection(topIf), null);
-
                         stack.Remove(1); // then
                         stack.Remove(2); // if
 
@@ -1443,14 +1478,11 @@ namespace CoolCore
                         stack.Remove(1);
                         stack.Remove(2);
                         stack.Push(new If(null, new Body((StatementCollection)stack.Pop(), null), stack.PopExpression()));
-                        //Body elseBody = new Body(new StatementCollection((If)stack.Pop()), null);
-                        //stack.Remove(1); // then
-                        //stack.Remove(2); // elsif
-
-                        //stack.Push(new If(elseBody, new Body((StatementCollection)stack.Pop(), null), stack.PopExpression()));
                     }
                     break;
+                #endregion
 
+                #region ==> Try Catch statements
                 case (short)ProductionIndex.Trystmt_Try_End_Try:
                     // <TRYSTMT> ::= try <STATEMENTS> <CATCH_CLAUSE> end try
                     break;
@@ -1462,6 +1494,7 @@ namespace CoolCore
                 case (short)ProductionIndex.Catch_clause_Catch_Lparan_Id_Rparan2:
                     // <CATCH_CLAUSE> ::= catch '(' <TYPE> Id ')' <STATEMENTS> <CATCH_CLAUSE>
                     break;
+                #endregion
 
                 case (short)ProductionIndex.Outputstmt_Output_Ltlt:
                     {

@@ -9,12 +9,6 @@ begin
 	if (i > j) && (k == 1) then
 		output << "i > j && k == 1";
 		i = 1;
-	elsif (i > j) && (k == 0) then
-		output << "i > j && k == 0";
-		i = 999;
-	elsif i == j then
-		output << "i == j";
-		cmp = 0;
 	else
 		output << "else";
 		cmp = -1;
