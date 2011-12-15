@@ -1,0 +1,22 @@
+﻿method void main() is
+    declare integer i, j;
+	declare integer k, cmp;
+begin
+    input >> i;
+	input >> j;
+	input >> k;
+
+	if (i > j) && (k == 1) then
+		output << "i > j && k == 1";
+		i = 1;
+	else
+		output << "else";
+		cmp = -1;
+	end if
+		
+		 
+	output << i;
+	output << j;
+	output << k;
+	output << cmp;
+end main

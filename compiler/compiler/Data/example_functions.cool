@@ -1,0 +1,33 @@
+﻿method void main() is
+    declare integer i, j, k, m;
+begin
+	input >> i;
+	input >> j;
+	k = call summ(i, j);
+	output << "SUMM result:";
+	output << k;	
+
+	k = call substract(i, j);
+	output << "Substract result:";
+	output << k;
+
+	call sub(i, j, ref k);
+	output << "Substract result:";
+	output << k;
+end main
+
+method integer summ(integer a, integer b) is
+begin
+	return a + b;
+end main
+
+method integer substract(integer a, integer b) is
+begin
+	return a - b;
+end main
+
+method void sub(integer a, integer b, ref integer c) is
+begin
+	c = a - b;
+	return;
+end main

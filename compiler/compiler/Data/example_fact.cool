@@ -1,0 +1,20 @@
+method void main() is
+    declare integer i, res;
+begin
+	input >> i;
+	
+	res = call fact(i);
+	output << res;
+end main
+
+method integer fact(integer n) is
+begin
+	if n < 0 then
+		return 0;
+	elsif n == 0 then
+		return 1;
+	else
+		return n * (call fact(n-1));
+	end if
+	return -1;
+end fact

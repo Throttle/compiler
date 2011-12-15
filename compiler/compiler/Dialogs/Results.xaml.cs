@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.IO;
 
 namespace compiler.Dialogs
 {
@@ -18,10 +19,19 @@ namespace compiler.Dialogs
         private GOLD.Reduction _root;
         public enum AnalyseType { lexical, syntax };
 
+        public Results(string out_file)
+        {
+            InitializeComponent();
+            this.ShowInTaskbar = true;
+            StreamReader il = File.OpenText(System.IO.Path.GetFullPath(out_file));
+            txtTree.Text = il.ReadToEnd();
+            il.Close();            
+        }
+
         public Results(AnalyseType analyser, bool errors, string failMessage, GOLD.Reduction root)
         {
             InitializeComponent();
-
+            this.ShowInTaskbar = true;
             this.Title = analyser == AnalyseType.lexical
                 ? "Lexical analyzer results"
                 : "Syntax analyzer results";

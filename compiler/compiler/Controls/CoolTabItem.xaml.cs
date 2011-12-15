@@ -17,12 +17,17 @@ namespace compiler.Controls
     public partial class CoolTabItem : TabItem
     {
         private string backup = "";
+        private string filePath = "";
 
         public bool NeedToSave
         {
             get { return this.tbCode.Document.Buffer.ChangeTracking.IsDirty; }
         }
 
+        public string FilePath
+        {
+            get { return this.filePath; }
+        }
 
         public string Code
         {
@@ -55,7 +60,7 @@ namespace compiler.Controls
 
         private void LoadFromFile(string file_path)
         {
-            //System.IO.TextReader tr = new System.IO.StreamReader(file_path);
+            this.filePath = file_path;
             this.tbCode.Document = AqiStar.Controls.TextEditor.Text.Document.Load(file_path);// = tr.ReadToEnd();
             //tr.Close();
 
@@ -66,6 +71,7 @@ namespace compiler.Controls
 
         public void Save(string file_path)
         {
+            this.filePath = file_path;
             this.tbCode.Document.Save(file_path);
             this.Header = System.IO.Path.GetFileName(file_path);
             this.backup = this.Code;

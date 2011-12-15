@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace CoolCore.Compilation
 {
@@ -9,6 +10,9 @@ namespace CoolCore.Compilation
     {
         private Module m_Module = null;
         private SymbolTable m_Globals = null;
+        private Stack<Label> begin_block = new Stack<Label>();
+        private Stack<Label> end_block = new Stack<Label>();
+
 
         public Generator(Module module)
         {
@@ -25,7 +29,7 @@ namespace CoolCore.Compilation
             ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(m_Module.Name, m_Module.Name + ".exe", true);
 
             //
-            // Create global variables.
+            // Создаем глобальные переменные
             //
 
             TypeBuilder globalBuilder = moduleBuilder.DefineType("Global");
@@ -44,7 +48,7 @@ namespace CoolCore.Compilation
             globalBuilder.CreateType();
 
             //
-            // Create functions.
+            // Строим функции
             //
 
             m_Module.Body.SymbolTable = m_Globals;
@@ -56,7 +60,7 @@ namespace CoolCore.Compilation
             }
 
             //
-            // Create entry point.
+            // Создаем точку входа (функция main)
             //
 
             MethodBuilder mainBuilder = moduleBuilder.DefineGlobalMethod("Main", MethodAttributes.Public | MethodAttributes.Static, typeof(void), null);
@@ -187,6 +191,9 @@ namespace CoolCore.Compilation
                         else if (literal.Value == "false")
                             il.Emit(OpCodes.Ldc_I4, 0);
                         break;
+                    case LiteralType.String:
+                        il.Emit(OpCodes.Ldstr, literal.Value);
+                        break;
                 }
             }
             else if (expression is Name)
@@ -217,33 +224,35 @@ namespace CoolCore.Compilation
         }
 
 
-
-        // Used to keep all function names unique.
+        // Таблица для хранения функций модуля
         private SymbolTable m_Functions = new SymbolTable();
+
 
         private void BuildFunctionStubs(Body body, ModuleBuilder builder)
         {
             if (body == null || builder == null)
                 throw new ArgumentNullException();
 
-            SymbolTable sibillings = new SymbolTable(m_Globals);
+            //SymbolTable sibillings = new SymbolTable(m_Globals);
 
             if (body != null && body.Functions != null)
             {
                 foreach (Function function in body.Functions)
                 {
-                    // Make child visible to sibillings
-                    function.Body.SymbolTable = sibillings;
+                    // В фукнции должны быть видны глобальные переменные
+                    function.Body.SymbolTable = new SymbolTable(m_Globals);
 
                     MethodBuilder method = BuildFunctionStub(function, builder);
 
-                    // Make child visible to parent.
+                    // Добавляем дочернюю функцию в таблицу родителя
                     body.SymbolTable.Add(function.Name, SymbolType.Function, function, method);
-                    sibillings.Add(function.Name, SymbolType.Function, function, method);
+                    //sibillings.Add(function.Name, SymbolType.Function, function, method);
 
 
                     BuildFunctionStubs(function.Body, builder);
                 }
+
+                
             }
         }
 
@@ -252,18 +261,18 @@ namespace CoolCore.Compilation
             if (function == null || builder == null)
                 throw new ArgumentNullException();
             //
-            // Build function stub.
+            // Создаем функцию
             //
 
-            // Find an unique name.
+            // Имя (уникальное)
             string functionName = function.Name;
             while (m_Functions.Find(functionName, SymbolType.Function) != null)
                 functionName += "#";
 
-            // Find return type.
+            // Возвращаемый тип
             System.Type returnType = function.Type.ToSystemType();
 
-            // Find parameters.
+            // Параметры
             System.Type[] parameters = null;
             if (function.Parameters != null)
             {
@@ -275,7 +284,7 @@ namespace CoolCore.Compilation
                 }
             }
 
-            // Create method.
+            // Создаем метод (глобально)
             MethodBuilder method = builder.DefineGlobalMethod(functionName, MethodAttributes.Public | MethodAttributes.Static, returnType, parameters);
 
             if (function.Parameters != null)
@@ -299,7 +308,7 @@ namespace CoolCore.Compilation
                 throw new ArgumentNullException();
 
             //
-            // Build child functions.
+            // Собираем дочерние функции
             //
 
             if (function.Body.Functions != null)
@@ -309,7 +318,7 @@ namespace CoolCore.Compilation
             }
 
             //
-            // Build function body.
+            // Собираем тело функции
             //
 
             ILGenerator il = function.Builder.GetILGenerator();
@@ -320,10 +329,10 @@ namespace CoolCore.Compilation
 
         }
 
-        private void EmitBody(ILGenerator il, Body body, bool root)
+        private void EmitBody(ILGenerator il, Body body, bool root, object additional_param = null)
         {
             //
-            // Declare local variables.
+            // Определяем локальные переменные
             //
 
             foreach (Variable variable in body.Variables)
@@ -338,11 +347,12 @@ namespace CoolCore.Compilation
                 else
                 {
                     local = il.DeclareLocal(variable.Type.ToSystemType());
-                    body.SymbolTable.Add(variable.Name, SymbolType.Variable, variable, local);
+                    if (variable.Type.VariableType != VariableType.PrimitiveArray)
+                        body.SymbolTable.Add(variable.Name, SymbolType.Variable, variable, local);
                 }
 
                 //
-                // Initialize  variable.
+                // Инициализируем переменные
                 //
 
                 if (variable.Type.VariableType == VariableType.Primitive)
@@ -359,7 +369,7 @@ namespace CoolCore.Compilation
                 }
                 else if (variable.Type.VariableType == VariableType.PrimitiveArray)
                 {
-                    // Empty array initialization.
+                    // Определяем пустой массив
                     if (variable.Value != null && variable.Value is Expression)
                     {
                         EmitExpression(il, (Expression)variable.Value, body.SymbolTable);
@@ -382,16 +392,16 @@ namespace CoolCore.Compilation
 
                         for (int x = 0; x < elements.Count; x++)
                         {
-                            // Load array
+                            // загружаем массив
                             if (root)
                                 il.Emit(OpCodes.Ldsfld, global);
                             else
                                 il.Emit(OpCodes.Ldloc, local);
-                            // Load index
+                            // загружаем индекс
                             il.Emit(OpCodes.Ldc_I4, x);
-                            // Load value
+                            // значение
                             EmitExpression(il, elements[x].Expression, body.SymbolTable);
-                            // Store
+                            // сохраняем
                             il.Emit(OpCodes.Stelem_I4);
                         }
 
@@ -405,76 +415,24 @@ namespace CoolCore.Compilation
                 if (statement is Variable)
                 {
                     Variable variable = statement as Variable;
-
-                    LocalBuilder local = null;
-                    FieldBuilder global = null;
-
-                    if (root)
+                    // Определяем пустой массив
+                    if (variable.Value != null && variable.Value is Expression)
                     {
-                        global = (FieldBuilder)body.SymbolTable.Find(variable.Name, SymbolType.Variable).CodeObject;
-                    }
-                    else
-                    {
-                        local = il.DeclareLocal(variable.Type.ToSystemType());
-                        body.SymbolTable.Add(variable.Name, SymbolType.Variable, variable, local);
-                    }
-
-                    //
-                    // Initialize  variable.
-                    //
-
-                    if (variable.Type.VariableType == VariableType.Primitive)
-                    {
-                        if (variable.Value != null && variable.Value is Expression)
+                        EmitExpression(il, (Expression)variable.Value, body.SymbolTable);
+                        il.Emit(OpCodes.Newarr, variable.Type.ToSystemType());
+                        LocalBuilder local = null;
+                        FieldBuilder global = null;
+                        if (root)
                         {
-                            EmitExpression(il, (Expression)variable.Value, body.SymbolTable);
-
-                            if (root)
-                                il.Emit(OpCodes.Stsfld, global);
-                            else
-                                il.Emit(OpCodes.Stloc, local);
+                            global = (FieldBuilder)body.SymbolTable.Find(variable.Name, SymbolType.Variable).CodeObject;
+                            il.Emit(OpCodes.Stsfld, global);
                         }
-                    }
-                    else if (variable.Type.VariableType == VariableType.PrimitiveArray)
-                    {
-                        // Empty array initialization.
-                        if (variable.Value != null && variable.Value is Expression)
+                        else
                         {
-                            EmitExpression(il, (Expression)variable.Value, body.SymbolTable);
-                            il.Emit(OpCodes.Newarr, variable.Type.ToSystemType());
-                            if (root)
-                                il.Emit(OpCodes.Stsfld, global);
-                            else
-                                il.Emit(OpCodes.Stloc, local);
+                            local = il.DeclareLocal(variable.Type.ToSystemType());
+                            body.SymbolTable.Add(variable.Name, SymbolType.Variable, variable, local);
+                            il.Emit(OpCodes.Stloc, local);
                         }
-                        else if (variable.Value != null && variable.Value is ElementCollection)
-                        {
-                            ElementCollection elements = variable.Value as ElementCollection;
-
-                            il.Emit(OpCodes.Ldc_I4, elements.Count);
-                            il.Emit(OpCodes.Newarr, variable.Type.ToSystemType());
-                            if (root)
-                                il.Emit(OpCodes.Stsfld, global);
-                            else
-                                il.Emit(OpCodes.Stloc, local);
-
-                            for (int x = 0; x < elements.Count; x++)
-                            {
-                                // Load array
-                                if (root)
-                                    il.Emit(OpCodes.Ldsfld, global);
-                                else
-                                    il.Emit(OpCodes.Ldloc, local);
-                                // Load index
-                                il.Emit(OpCodes.Ldc_I4, x);
-                                // Load value
-                                EmitExpression(il, elements[x].Expression, body.SymbolTable);
-                                // Store
-                                il.Emit(OpCodes.Stelem_I4);
-                            }
-
-                        }
-
                     }
                 }
                 else if (statement is Assignment)
@@ -508,12 +466,12 @@ namespace CoolCore.Compilation
                 else if (statement is If)
                 {
                     //
-                    // Genereate if statement.
+                    // Генерируем if инструкцию
                     //
 
                     If ifStatement = statement as If;
 
-                    // Eval condition
+                    // Вычисляем условие
                     EmitExpression(il, ifStatement.Condition, body.SymbolTable);
 
                     if (ifStatement.IfBody != null && ifStatement.ElseBody == null)
@@ -542,61 +500,33 @@ namespace CoolCore.Compilation
                 else if (statement is While)
                 {
                     //
-                    // Generate while statement.
+                    // Генерируем while инструкцию
                     //
 
                     While whileStatement = statement as While;
                     whileStatement.Body.SymbolTable = new SymbolTable(body.SymbolTable);
                     Label begin = il.DefineLabel();
+                    begin_block.Push(begin);
                     Label exit = il.DefineLabel();
+                    end_block.Push(exit);
                     il.MarkLabel(begin);
                     // Eval condition
                     EmitExpression(il, whileStatement.Condition, body.SymbolTable);
                     il.Emit(OpCodes.Brfalse, exit);
-                    EmitBody(il, whileStatement.Body, false);
+                    EmitBody(il, whileStatement.Body, false, new Label[]{begin, exit});
                     il.Emit(OpCodes.Br, begin);
                     il.MarkLabel(exit);
+                    begin_block.Pop();
+                    end_block.Pop();
 
                 }
-                else if (statement is Do)
+                else if (statement is Break)
                 {
-                    //
-                    // Generate do statement.
-                    //
-
-                    Do doStatement = statement as Do;
-                    doStatement.Body.SymbolTable = new SymbolTable(body.SymbolTable);
-
-                    Label loop = il.DefineLabel();
-                    il.MarkLabel(loop);
-                    EmitBody(il, doStatement.Body, false);
-                    EmitExpression(il, doStatement.Condition, body.SymbolTable);
-                    il.Emit(OpCodes.Brtrue, loop);
+                    il.Emit(OpCodes.Br, end_block.Peek());
                 }
-                else if (statement is For)
+                else if (statement is Continue)
                 {
-                    //
-                    // Generate for statement.
-                    //
-
-                    For forStatement = statement as For;
-                    forStatement.Body.SymbolTable = new SymbolTable(body.SymbolTable);
-
-                    Label loop = il.DefineLabel();
-                    Label exit = il.DefineLabel();
-
-                    // Emit initializer
-                    EmitAssignment(il, forStatement.Initializer, body.SymbolTable);
-                    il.MarkLabel(loop);
-                    // Emit condition
-                    EmitExpression(il, forStatement.Condition, body.SymbolTable);
-                    il.Emit(OpCodes.Brfalse, exit);
-                    // Emit body
-                    EmitBody(il, forStatement.Body, false);
-                    // Emit counter
-                    EmitAssignment(il, forStatement.Counter, body.SymbolTable);
-                    il.Emit(OpCodes.Br, loop);
-                    il.MarkLabel(exit);
+                    il.Emit(OpCodes.Br, begin_block.Peek());
                 }
 
             }
@@ -608,7 +538,7 @@ namespace CoolCore.Compilation
             if (variable == null)
                 Error("Assignment variable " + assignment.Name + " unknown.");
 
-            // Non-indexed assignment
+            // Не массив
             if (assignment.Index == null)
             {
                 if (variable.CodeObject is ParameterBuilder)
@@ -618,10 +548,10 @@ namespace CoolCore.Compilation
                         il.Emit(OpCodes.Ldarg_S, ((ParameterBuilder)variable.CodeObject).Position - 1);
                 }
 
-                // Load value
+                // Получаем значение
                 EmitExpression(il, assignment.Value, symbolTable);
 
-                // Store
+                // Сохраняем
                 if (variable.CodeObject is LocalBuilder)
                     il.Emit(OpCodes.Stloc, (LocalBuilder)variable.CodeObject);
                 else if (variable.CodeObject is FieldBuilder)
@@ -637,16 +567,16 @@ namespace CoolCore.Compilation
             }
             else
             {
-                // Load array.
+                // Загружаем массив
                 if (variable.CodeObject is LocalBuilder)
                     il.Emit(OpCodes.Ldloc, (LocalBuilder)variable.CodeObject);
                 else if (variable.CodeObject is FieldBuilder)
                     il.Emit(OpCodes.Ldsfld, (FieldBuilder)variable.CodeObject);
-                // Load index.
+                // Индекс
                 EmitExpression(il, assignment.Index, symbolTable);
-                // Load value.
+                // Значение
                 EmitExpression(il, assignment.Value, symbolTable);
-                // Set
+                // Устанавливаем значение
                 il.Emit(OpCodes.Stelem_I4);
             }
         }
@@ -660,12 +590,11 @@ namespace CoolCore.Compilation
                 Function function = symbol.SyntaxObject as Function;
 
                 //
-                // Check arguments
+                // Проверка аргументов
                 //
 
                 if (call.Arguments == null && function.Parameters == null)
                 {
-                    // Ugly hack.
                     goto Hack;
                 }
                 else if (call.Arguments.Count != function.Parameters.Count)
@@ -678,6 +607,7 @@ namespace CoolCore.Compilation
                 }
                 else
                 {
+                    // проверка способа передачи параметра
                     for (int x = 0; x < call.Arguments.Count; x++)
                     {
                         if (call.Arguments[x].PassMethod != function.Parameters[x].PassMethod)
@@ -693,7 +623,7 @@ namespace CoolCore.Compilation
                     {
                         if (argument.PassMethod == PassMethod.ByReference)
                         {
-                            // Regular value
+                            // Если передаем по ссылке
                             if (argument.Value is Name)
                             {
                                 Symbol variable = symbolTable.Find(((Name)argument.Value).Value, SymbolType.Variable);
@@ -766,7 +696,7 @@ namespace CoolCore.Compilation
                 else if (call.Name == "Write")
                 {
                     EmitExpression(il, call.Arguments[0].Value, symbolTable);
-                    MethodInfo write = System.Type.GetType("System.Console").GetMethod("WriteLine", new System.Type[] { typeof(int) });
+                    MethodInfo write = System.Type.GetType("System.Console").GetMethod("WriteLine");//, new System.Type[] { typeof(int) });
                     il.EmitCall(OpCodes.Call, write, null);
                 }
                 else
@@ -775,7 +705,6 @@ namespace CoolCore.Compilation
                 }
             }
         }
-
 
         private void EmitCallStatement(ILGenerator il, CallStatement call, SymbolTable symbolTable)
         {
@@ -786,11 +715,10 @@ namespace CoolCore.Compilation
                 Function function = symbol.SyntaxObject as Function;
 
                 //
-                // Check arguments
+                // Проверка аргументов
                 //
                 if (call.Arguments == null && function.Parameters == null)
                 {
-                    // Ugly hack.
                     goto Hack;
                 }
                 else if (call.Arguments.Count != function.Parameters.Count)
@@ -818,7 +746,7 @@ namespace CoolCore.Compilation
                     {
                         if (argument.PassMethod == PassMethod.ByReference)
                         {
-                            // Regular value
+                            // Если параметр передан по ссылке
                             if (argument.Value is Name)
                             {
                                 Symbol variable = symbolTable.Find(((Name)argument.Value).Value, SymbolType.Variable);
@@ -892,7 +820,36 @@ namespace CoolCore.Compilation
                 else if (call.Name == "Write")
                 {
                     EmitExpression(il, call.Arguments[0].Value, symbolTable);
-                    MethodInfo write = System.Type.GetType("System.Console").GetMethod("WriteLine", new System.Type[] { typeof(int) });
+                    MethodInfo write = null;
+
+                    if (call.Arguments[0].Value is Literal)
+                    {
+                        Literal temp = call.Arguments[0].Value as Literal;
+                        System.Type type = null;
+                        switch (temp.LiteralType)
+                        {
+                            case LiteralType.Boolean:
+                                type = typeof(bool);
+                                break;
+                            case LiteralType.Character:
+                                type = typeof(char);
+                                break;
+                            case LiteralType.Integer:
+                                type = typeof(int);
+                                break;
+                            case LiteralType.Real:
+                                type = typeof(double);
+                                break;
+                            case LiteralType.String:
+                                type = typeof(string);
+                                break;
+                        }
+                        write = System.Type.GetType("System.Console").GetMethod("WriteLine", new System.Type[] { type });
+                    }
+                    else
+                    {
+                        write = System.Type.GetType("System.Console").GetMethod("WriteLine", new System.Type[] { typeof(int) });
+                    }
                     il.EmitCall(OpCodes.Call, write, null);
                 }
                 else
@@ -901,6 +858,5 @@ namespace CoolCore.Compilation
                 }
             }
         }
-
     }
 }

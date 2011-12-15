@@ -1,0 +1,10 @@
+﻿method void main() is
+    declare integer i;
+begin
+	input >> i;
+
+	if i == 1 then
+		return i;
+	end if
+	return;
+end main

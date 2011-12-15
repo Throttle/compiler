@@ -15,6 +15,7 @@ using System.IO;
 
 using compiler.Controls;
 using compiler.Dialogs;
+using System.Diagnostics;
 
 namespace compiler
 {
@@ -28,7 +29,7 @@ namespace compiler
             this.DataContext = this;
 
             LoadGrammarFile();
-            TestCoolCore();
+            //TestCoolCore();
         }
 
         private void TestCoolCore()
@@ -260,6 +261,43 @@ namespace compiler
             }
             else
                 MessageBox.Show("No code for parsing", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        private void miCG_Click(object sender, RoutedEventArgs e)
+        {
+            CoolCore.Language language = null;
+            string pathToGrammarEGT = System.IO.Path.GetFullPath("./../../Data/Cool.egt");
+
+
+
+            string pathToExampleEGT = System.IO.Path.GetFullPath((this.tc.SelectedItem as CoolTabItem).FilePath);
+            language = CoolCore.Language.FromFile(pathToGrammarEGT);
+            CoolCore.Compiler.Scanner scanner = new CoolCore.Compiler.Scanner(pathToExampleEGT, language);
+            CoolCore.Compiler.Parser parser = new CoolCore.Compiler.Parser(scanner, language);
+            CoolCore.Compiler.ParseTreeNode tree = parser.CreateParseTree();
+            CoolCore.Module module = parser.CreateSyntaxTree(System.IO.Path.GetFileName((this.tc.SelectedItem as CoolTabItem).FilePath));
+
+            CoolCore.Compilation.Generator generator = new CoolCore.Compilation.Generator(module);
+            
+            string path = module.Name + ".exe";
+
+            if (File.Exists(path))
+                File.Delete(path);
+
+            generator.Compile(path);
+
+            Process ildasm = new Process();
+            ildasm.StartInfo.FileName = System.IO.Path.GetFullPath("./../../Tools/ildasm.exe");
+            ildasm.StartInfo.Arguments = "/output=il" + module.Name + ".txt" + " " + path;
+            ildasm.Start();
+            ildasm.WaitForExit();
+            Results resForm = new Results(System.IO.Path.GetFullPath("il" + module.Name + ".txt"));
+            resForm.ShowDialog();
+        }
+
+        private void miCS_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("cmd");
         }
     }
 }
