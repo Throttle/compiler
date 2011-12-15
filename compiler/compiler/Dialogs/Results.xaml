@@ -5,9 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              WindowStartupLocation="CenterOwner" 
-             Height="331" Width="592" ResizeMode="CanResize" ShowInTaskbar="False" Title="Lexical and syntax analyzer results" Icon="/compiler;component/Images/programming.png">
+             Height="331" Width="592" ResizeMode="CanResize" ShowInTaskbar="False" Title="Results" Icon="/compiler;component/Images/programming.png">
     <Grid Width="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Button x:Name="btnClose" Content="Close" Margin="0,0,12,12" Click="btnClose_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="49" />
-        <TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" Margin="12,12,0,40" Name="txtTree" VerticalAlignment="Stretch" Width="Auto" />
+        <TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" Margin="12,12,0,40" Name="txtTree" VerticalAlignment="Stretch" Width="Auto" FontFamily="Consolas"/>
     </Grid>
 </Window>

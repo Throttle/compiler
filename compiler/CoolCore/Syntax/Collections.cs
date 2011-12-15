@@ -218,6 +218,78 @@ namespace CoolCore
 		}
 	}
 
+
+    public class FieldCollection : System.Collections.CollectionBase
+    {
+        public FieldCollection()
+        {
+            // empty
+        }
+
+        public FieldCollection(Field value)
+        {
+            Add(value);
+        }
+
+        public virtual void Add(Field value)
+        {
+            this.List.Add(value);
+        }
+
+        public virtual Field this[int index]
+        {
+            get
+            {
+                return (Field)this.List[index];
+            }
+            set
+            {
+                this.List[index] = value;
+            }
+        }
+
+        public class Enumerator : System.Collections.IEnumerator
+        {
+            private System.Collections.IEnumerator wrapped;
+
+            public Enumerator(FieldCollection collection)
+            {
+                this.wrapped = ((System.Collections.CollectionBase)collection).GetEnumerator();
+            }
+
+            public Field Current
+            {
+                get
+                {
+                    return (Field)(this.wrapped.Current);
+                }
+            }
+
+            object System.Collections.IEnumerator.Current
+            {
+                get
+                {
+                    return (Field)(this.wrapped.Current);
+                }
+            }
+
+            public bool MoveNext()
+            {
+                return this.wrapped.MoveNext();
+            }
+
+            public void Reset()
+            {
+                this.wrapped.Reset();
+            }
+        }
+
+        public new virtual FieldCollection.Enumerator GetEnumerator()
+        {
+            return new FieldCollection.Enumerator(this);
+        }
+    }
+
 	public class StructureCollection: System.Collections.CollectionBase
 {
 	public StructureCollection()

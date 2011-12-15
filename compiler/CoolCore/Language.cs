@@ -680,7 +680,7 @@ namespace CoolCore
                     }                                           
                 }
 			}
-			catch(Exception x)
+			catch(Exception )
 			{
                 return null;
             }
