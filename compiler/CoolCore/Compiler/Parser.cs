@@ -167,7 +167,7 @@ namespace CoolCore.Compiler
         }
 
 
-        public Module CreateSyntaxTree()
+        public Module CreateSyntaxTree(string module_name="MainProgram")
         {
             // Are we currently in a comment block.
             bool inCommentBlock = false;
@@ -280,7 +280,7 @@ namespace CoolCore.Compiler
                 else if (action.Type == ActionType.Accept)
                 {
                     Debug.WriteLine("Accept");
-                    return new Module((Body)syntaxStack.Pop(), "MainProgram");
+                    return new Module((Body)syntaxStack.Pop(), module_name);
                 }
                 currentState = (ParserState)stack.Peek();
             }

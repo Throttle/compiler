@@ -310,7 +310,7 @@ public class CoolParser
                 case GOLD.ParseMessage.LexicalError:
                     //Cannot recognize token
                     FailMessage = "Lexical Error:\n" +
- "Position: " + parser.CurrentPosition().Line + ", " + parser.CurrentPosition().Column + "\n" +
+ "Position: " + (parser.CurrentPosition().Line + 1) + ", " + parser.CurrentPosition().Column + "\n" +
  "Read: " + parser.CurrentToken().Data;
                     done = true;
                     break;
@@ -318,7 +318,7 @@ public class CoolParser
                 case GOLD.ParseMessage.SyntaxError:
                     //Expecting a different token
                     FailMessage = "Syntax Error:\n" +
- "Position: " + parser.CurrentPosition().Line + ", " + parser.CurrentPosition().Column + "\n" +
+ "Position: " + (parser.CurrentPosition().Line + 1) + ", " + parser.CurrentPosition().Column + "\n" +
  "Read: " + parser.CurrentToken().Data + "\n" +
  "Expecting: " + parser.ExpectedSymbols().Text();
                     done = true;
