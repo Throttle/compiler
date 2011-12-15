@@ -280,7 +280,7 @@ namespace CoolCore.Compiler
                 else if (action.Type == ActionType.Accept)
                 {
                     Debug.WriteLine("Accept");
-                    return (Module)syntaxStack.Pop();
+                    return new Module((Body)syntaxStack.Pop(), "MainProgram");
                 }
                 currentState = (ParserState)stack.Peek();
             }

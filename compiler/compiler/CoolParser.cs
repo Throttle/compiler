@@ -75,62 +75,66 @@ public class CoolParser
         @Private = 61,                             // private
         @Protected = 62,                           // protected
         @Public = 63,                              // public
-        @Return = 64,                              // return
-        @Stringliteral = 65,                       // StringLiteral
-        @Super = 66,                               // super
-        @Then = 67,                                // then
-        @This = 68,                                // this
-        @Throw = 69,                               // throw
-        @True = 70,                                // true
-        @Try = 71,                                 // try
-        @Void = 72,                                // void
-        @Access_spec = 73,                         // <ACCESS_SPEC>
-        @Allocator = 74,                           // <ALLOCATOR>
-        @Arglist = 75,                             // <ARGLIST>
-        @Array_type = 76,                          // <ARRAY_TYPE>
-        @Assignment = 77,                          // <ASSIGNMENT>
-        @Block = 78,                               // <BLOCK>
-        @Body = 79,                                // <BODY>
-        @Cast_expr = 80,                           // <CAST_EXPR>
-        @Catch_clause = 81,                        // <CATCH_CLAUSE>
-        @Class2 = 82,                              // <CLASS>
-        @Class_member = 83,                        // <CLASS_MEMBER>
-        @Class_memberlist = 84,                    // <CLASS_MEMBERLIST>
-        @Elseif_part = 85,                         // <ELSEIF_PART>
-        @Elsepart = 86,                            // <ELSEPART>
-        @Expression = 87,                          // <EXPRESSION>
-        @Expression_binary = 88,                   // <EXPRESSION_BINARY>
-        @Expression_factor = 89,                   // <EXPRESSION_FACTOR>
-        @Expression_primary = 90,                  // <EXPRESSION_PRIMARY>
-        @Expression_term = 91,                     // <EXPRESSION_TERM>
-        @Expression_unary = 92,                    // <EXPRESSION_UNARY>
-        @Factor = 93,                              // <FACTOR>
-        @Field_decl = 94,                          // <FIELD_DECL>
-        @Field_decllist = 95,                      // <FIELD_DECLLIST>
-        @Function_call = 96,                       // <FUNCTION_CALL>
-        @Ifstmt = 97,                              // <IFSTMT>
-        @Inputstmt = 98,                           // <INPUTSTMT>
-        @M_type = 99,                              // <M_TYPE>
-        @Method2 = 100,                            // <METHOD>
-        @Method_decl = 101,                        // <METHOD_DECL>
-        @Method_id = 102,                          // <METHOD_ID>
-        @Name = 103,                               // <NAME>
-        @Outputstmt = 104,                         // <OUTPUTSTMT>
-        @Parameter_decl = 105,                     // <PARAMETER_DECL>
-        @Parameters = 106,                         // <PARAMETERS>
-        @Primitive_type = 107,                     // <PRIMITIVE_TYPE>
-        @Program = 108,                            // <PROGRAM>
-        @Statement = 109,                          // <STATEMENT>
-        @Statements = 110,                         // <STATEMENTS>
-        @Structure_type = 111,                     // <STRUCTURE_TYPE>
-        @Super_class = 112,                        // <SUPER_CLASS>
-        @Super_init = 113,                         // <SUPER_INIT>
-        @This_init = 114,                          // <THIS_INIT>
-        @Trystmt = 115,                            // <TRYSTMT>
-        @Type = 116,                               // <TYPE>
-        @Var_typelist = 117,                       // <VAR_TYPELIST>
-        @Vardeclist = 118,                         // <VARDECLIST>
-        @Vardecs = 119                             // <VARDECS>
+        @Ref = 64,                                 // ref
+        @Return = 65,                              // return
+        @Stringliteral = 66,                       // StringLiteral
+        @Super = 67,                               // super
+        @Then = 68,                                // then
+        @This = 69,                                // this
+        @Throw = 70,                               // throw
+        @True = 71,                                // true
+        @Try = 72,                                 // try
+        @Void = 73,                                // void
+        @Access_spec = 74,                         // <ACCESS_SPEC>
+        @Allocator = 75,                           // <ALLOCATOR>
+        @Arglist = 76,                             // <ARGLIST>
+        @Argument = 77,                            // <ARGUMENT>
+        @Array_type = 78,                          // <ARRAY_TYPE>
+        @Assignment = 79,                          // <ASSIGNMENT>
+        @Block = 80,                               // <BLOCK>
+        @Body = 81,                                // <BODY>
+        @Cast_expr = 82,                           // <CAST_EXPR>
+        @Catch_clause = 83,                        // <CATCH_CLAUSE>
+        @Class2 = 84,                              // <CLASS>
+        @Class_member = 85,                        // <CLASS_MEMBER>
+        @Class_memberlist = 86,                    // <CLASS_MEMBERLIST>
+        @Elseif_part = 87,                         // <ELSEIF_PART>
+        @Elsepart = 88,                            // <ELSEPART>
+        @Expression = 89,                          // <EXPRESSION>
+        @Expression_binary = 90,                   // <EXPRESSION_BINARY>
+        @Expression_factor = 91,                   // <EXPRESSION_FACTOR>
+        @Expression_primary = 92,                  // <EXPRESSION_PRIMARY>
+        @Expression_term = 93,                     // <EXPRESSION_TERM>
+        @Expression_unary = 94,                    // <EXPRESSION_UNARY>
+        @Factor = 95,                              // <FACTOR>
+        @Field_decl = 96,                          // <FIELD_DECL>
+        @Field_decllist = 97,                      // <FIELD_DECLLIST>
+        @Function_call = 98,                       // <FUNCTION_CALL>
+        @Ifstmt = 99,                              // <IFSTMT>
+        @Inputstmt = 100,                          // <INPUTSTMT>
+        @M_type = 101,                             // <M_TYPE>
+        @Method2 = 102,                            // <METHOD>
+        @Method_decl = 103,                        // <METHOD_DECL>
+        @Method_id = 104,                          // <METHOD_ID>
+        @Name = 105,                               // <NAME>
+        @Outputstmt = 106,                         // <OUTPUTSTMT>
+        @Parameter = 107,                          // <PARAMETER>
+        @Parameter_decl = 108,                     // <PARAMETER_DECL>
+        @Parameters = 109,                         // <PARAMETERS>
+        @Parameters_decl = 110,                    // <PARAMETERS_DECL>
+        @Primitive_type = 111,                     // <PRIMITIVE_TYPE>
+        @Program = 112,                            // <PROGRAM>
+        @Statement = 113,                          // <STATEMENT>
+        @Statements = 114,                         // <STATEMENTS>
+        @Structure_type = 115,                     // <STRUCTURE_TYPE>
+        @Super_class = 116,                        // <SUPER_CLASS>
+        @Super_init = 117,                         // <SUPER_INIT>
+        @This_init = 118,                          // <THIS_INIT>
+        @Trystmt = 119,                            // <TRYSTMT>
+        @Type = 120,                               // <TYPE>
+        @Var_typelist = 121,                       // <VAR_TYPELIST>
+        @Vardeclist = 122,                         // <VARDECLIST>
+        @Vardecs = 123                             // <VARDECS>
     }
 
     private enum ProductionIndex
@@ -156,115 +160,120 @@ public class CoolParser
         @Name_Id = 18,                             // <NAME> ::= Id
         @Name_Dot_Id = 19,                         // <NAME> ::= <NAME> '.' Id
         @Assignment_Eq = 20,                       // <ASSIGNMENT> ::= <NAME> '=' <EXPRESSION>
-        @Factor_This = 21,                         // <FACTOR> ::= this
-        @Factor_Super = 22,                        // <FACTOR> ::= super
-        @Factor_Number = 23,                       // <FACTOR> ::= Number
-        @Factor_False = 24,                        // <FACTOR> ::= false
-        @Factor_True = 25,                         // <FACTOR> ::= true
-        @Factor_Null = 26,                         // <FACTOR> ::= null
-        @Factor = 27,                              // <FACTOR> ::= <ALLOCATOR>
-        @Factor2 = 28,                             // <FACTOR> ::= <CAST_EXPR>
-        @Allocator_New_Lparan_Rparan = 29,         // <ALLOCATOR> ::= new <TYPE> '(' <ARGLIST> ')'
-        @Allocator_New_Lparan_Rparan2 = 30,        // <ALLOCATOR> ::= new <TYPE> '(' ')'
-        @Allocator_New_Lbracket_Rbracket = 31,     // <ALLOCATOR> ::= new <TYPE> '[' <EXPRESSION> ']'
-        @Arglist = 32,                             // <ARGLIST> ::= <EXPRESSION>
-        @Arglist_Comma = 33,                       // <ARGLIST> ::= <ARGLIST> ',' <EXPRESSION>
-        @Cast_expr_Cast_Lparan_Comma_Rparan = 34,  // <CAST_EXPR> ::= cast '(' <TYPE> ',' <EXPRESSION> ')'
-        @Expression = 35,                          // <EXPRESSION> ::= <EXPRESSION_TERM>
-        @Expression_Plus = 36,                     // <EXPRESSION> ::= <EXPRESSION> '+' <EXPRESSION_TERM>
-        @Expression_Minus = 37,                    // <EXPRESSION> ::= <EXPRESSION> '-' <EXPRESSION_TERM>
-        @Expression_term = 38,                     // <EXPRESSION_TERM> ::= <EXPRESSION_FACTOR>
-        @Expression_term_Times = 39,               // <EXPRESSION_TERM> ::= <EXPRESSION_TERM> '*' <EXPRESSION_FACTOR>
-        @Expression_term_Div = 40,                 // <EXPRESSION_TERM> ::= <EXPRESSION_TERM> '/' <EXPRESSION_FACTOR>
-        @Expression_factor = 41,                   // <EXPRESSION_FACTOR> ::= <EXPRESSION_BINARY>
-        @Expression_factor_Percent = 42,           // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '%' <EXPRESSION_BINARY>
-        @Expression_factor_Gt = 43,                // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '>' <EXPRESSION_BINARY>
-        @Expression_factor_Lt = 44,                // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '<' <EXPRESSION_BINARY>
-        @Expression_factor_Gteq = 45,              // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '>=' <EXPRESSION_BINARY>
-        @Expression_factor_Lteq = 46,              // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '<=' <EXPRESSION_BINARY>
-        @Expression_factor_Eqeq = 47,              // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '==' <EXPRESSION_BINARY>
-        @Expression_factor_Num = 48,               // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '#' <EXPRESSION_BINARY>
-        @Expression_binary = 49,                   // <EXPRESSION_BINARY> ::= <EXPRESSION_UNARY>
-        @Expression_binary_Ampamp = 50,            // <EXPRESSION_BINARY> ::= <EXPRESSION_BINARY> '&&' <EXPRESSION_UNARY>
-        @Expression_binary_Pipepipe = 51,          // <EXPRESSION_BINARY> ::= <EXPRESSION_BINARY> '||' <EXPRESSION_UNARY>
-        @Expression_unary_Plus = 52,               // <EXPRESSION_UNARY> ::= '+' <EXPRESSION_PRIMARY>
-        @Expression_unary_Minus = 53,              // <EXPRESSION_UNARY> ::= '-' <EXPRESSION_PRIMARY>
-        @Expression_unary_Exclam = 54,             // <EXPRESSION_UNARY> ::= '!' <EXPRESSION_PRIMARY>
-        @Expression_unary = 55,                    // <EXPRESSION_UNARY> ::= <EXPRESSION_PRIMARY>
-        @Expression_unary_Lbracket_Rbracket = 56,  // <EXPRESSION_UNARY> ::= <EXPRESSION_PRIMARY> '[' <EXPRESSION> ']'
-        @Expression_unary_Lparan_Rparan = 57,      // <EXPRESSION_UNARY> ::= <EXPRESSION_PRIMARY> '(' <ARGLIST> ')'
-        @Expression_primary = 58,                  // <EXPRESSION_PRIMARY> ::= <NAME>
-        @Expression_primary2 = 59,                 // <EXPRESSION_PRIMARY> ::= <FUNCTION_CALL>
-        @Expression_primary3 = 60,                 // <EXPRESSION_PRIMARY> ::= <FACTOR>
-        @Expression_primary_Lparan_Rparan = 61,    // <EXPRESSION_PRIMARY> ::= '(' <EXPRESSION> ')'
-        @Statements = 62,                          // <STATEMENTS> ::= <STATEMENT>
-        @Statements2 = 63,                         // <STATEMENTS> ::= <STATEMENTS> <STATEMENT>
-        @Statement = 64,                           // <STATEMENT> ::= <BLOCK>
-        @Statement2 = 65,                          // <STATEMENT> ::= <METHOD>
-        @Statement3 = 66,                          // <STATEMENT> ::= <CLASS>
-        @Statement_Semi = 67,                      // <STATEMENT> ::= <FUNCTION_CALL> ';'
-        @Statement_Semi2 = 68,                     // <STATEMENT> ::= <ASSIGNMENT> ';'
-        @Statement_Semi3 = 69,                     // <STATEMENT> ::= <INPUTSTMT> ';'
-        @Statement_Semi4 = 70,                     // <STATEMENT> ::= <OUTPUTSTMT> ';'
-        @Statement_Return_Semi = 71,               // <STATEMENT> ::= return <EXPRESSION> ';'
-        @Statement_Return_Semi2 = 72,              // <STATEMENT> ::= return ';'
-        @Statement_Continue_Semi = 73,             // <STATEMENT> ::= continue ';'
-        @Statement_Break_Semi = 74,                // <STATEMENT> ::= break ';'
-        @Statement4 = 75,                          // <STATEMENT> ::= <IFSTMT>
-        @Statement5 = 76,                          // <STATEMENT> ::= <TRYSTMT>
-        @Statement_Loop_End_Loop = 77,             // <STATEMENT> ::= loop <STATEMENTS> end loop
-        @Statement_Exit_Semi = 78,                 // <STATEMENT> ::= exit ';'
-        @Statement_Throw_Semi = 79,                // <STATEMENT> ::= throw <EXPRESSION> ';'
-        @Ifstmt_If_Then_End_If = 80,               // <IFSTMT> ::= if <EXPRESSION> then <STATEMENTS> end if
-        @Ifstmt_If_Then_End_If2 = 81,              // <IFSTMT> ::= if <EXPRESSION> then <STATEMENTS> <ELSEPART> end if
-        @Ifstmt_If_Then_End_If3 = 82,              // <IFSTMT> ::= if <EXPRESSION> then <STATEMENTS> <ELSEIF_PART> <ELSEPART> end if
-        @Elsepart_Else = 83,                       // <ELSEPART> ::= else <STATEMENTS>
-        @Elseif_part_Elsif_Then = 84,              // <ELSEIF_PART> ::= elsif <EXPRESSION> then <STATEMENTS>
-        @Elseif_part_Elsif_Then2 = 85,             // <ELSEIF_PART> ::= <ELSEIF_PART> elsif <EXPRESSION> then <STATEMENTS>
-        @Trystmt_Try_End_Try = 86,                 // <TRYSTMT> ::= try <STATEMENTS> <CATCH_CLAUSE> end try
-        @Catch_clause_Catch_Lparan_Id_Rparan = 87,  // <CATCH_CLAUSE> ::= catch '(' <TYPE> Id ')' <STATEMENTS>
-        @Catch_clause_Catch_Lparan_Id_Rparan2 = 88,  // <CATCH_CLAUSE> ::= catch '(' <TYPE> Id ')' <STATEMENTS> <CATCH_CLAUSE>
-        @Outputstmt_Output_Ltlt = 89,              // <OUTPUTSTMT> ::= output '<<' <EXPRESSION>
-        @Outputstmt_Output_Ltlt_Stringliteral = 90,  // <OUTPUTSTMT> ::= output '<<' StringLiteral
-        @Outputstmt_Output_Ltlt_Charliteral = 91,  // <OUTPUTSTMT> ::= output '<<' CharLiteral
-        @Inputstmt_Input_Gtgt = 92,                // <INPUTSTMT> ::= input '>>' <NAME>
-        @Type = 93,                                // <TYPE> ::= <STRUCTURE_TYPE>
-        @Type2 = 94,                               // <TYPE> ::= <PRIMITIVE_TYPE>
-        @Type3 = 95,                               // <TYPE> ::= <ARRAY_TYPE>
-        @Primitive_type_Integer = 96,              // <PRIMITIVE_TYPE> ::= integer
-        @Primitive_type_Boolean = 97,              // <PRIMITIVE_TYPE> ::= boolean
-        @Structure_type_Id = 98,                   // <STRUCTURE_TYPE> ::= Id
-        @Array_type_Lbracketrbracket = 99,         // <ARRAY_TYPE> ::= <STRUCTURE_TYPE> '[]'
-        @Array_type_Lbracketrbracket2 = 100,       // <ARRAY_TYPE> ::= <PRIMITIVE_TYPE> '[]'
-        @Access_spec_Private = 101,                // <ACCESS_SPEC> ::= private
-        @Access_spec_Protected = 102,              // <ACCESS_SPEC> ::= protected
-        @Access_spec_Public = 103,                 // <ACCESS_SPEC> ::= public
-        @Field_decl_Semi = 104,                    // <FIELD_DECL> ::= <ACCESS_SPEC> <TYPE> <FIELD_DECLLIST> ';'
-        @Field_decllist_Id = 105,                  // <FIELD_DECLLIST> ::= Id
-        @Field_decllist_Comma_Id = 106,            // <FIELD_DECLLIST> ::= <FIELD_DECLLIST> ',' Id
-        @Method_Method_Lparan_Rparan_Is_Id = 107,  // <METHOD> ::= method <M_TYPE> <METHOD_ID> '(' <PARAMETERS> ')' is <BODY> Id
-        @Method_Method_Lparan_Rparan_Is_Id2 = 108,  // <METHOD> ::= method <M_TYPE> <METHOD_ID> '(' ')' is <BODY> Id
-        @Method_decl_Method_Id_Lparan_Rparan_Semi = 109,  // <METHOD_DECL> ::= <ACCESS_SPEC> method <M_TYPE> Id '(' <PARAMETER_DECL> ')' ';'
-        @Method_decl_Method_Id_Lparan_Rparan_Semi2 = 110,  // <METHOD_DECL> ::= <ACCESS_SPEC> method <M_TYPE> Id '(' ')' ';'
-        @Method_id_Id_Coloncolon_Id = 111,         // <METHOD_ID> ::= Id '::' Id
-        @Method_id_Id = 112,                       // <METHOD_ID> ::= Id
-        @M_type = 113,                             // <M_TYPE> ::= <TYPE>
-        @M_type_Void = 114,                        // <M_TYPE> ::= void
-        @Parameters_Id = 115,                      // <PARAMETERS> ::= <TYPE> Id
-        @Parameters_Comma_Id = 116,                // <PARAMETERS> ::= <PARAMETERS> ',' <TYPE> Id
-        @Parameter_decl_Id = 117,                  // <PARAMETER_DECL> ::= <TYPE> Id
-        @Parameter_decl = 118,                     // <PARAMETER_DECL> ::= <TYPE>
-        @Parameter_decl_Comma_Id = 119,            // <PARAMETER_DECL> ::= <PARAMETER_DECL> ',' <TYPE> Id
-        @Parameter_decl_Comma = 120,               // <PARAMETER_DECL> ::= <PARAMETER_DECL> ',' <TYPE>
-        @Function_call_Call_Lparan_Rparan = 121,   // <FUNCTION_CALL> ::= call <NAME> '(' ')'
-        @Function_call_Call_Lparan_Rparan2 = 122,  // <FUNCTION_CALL> ::= call <NAME> '(' <ARGLIST> ')'
-        @Class_Class_Id_Is_End_Id = 123,           // <CLASS> ::= class Id <SUPER_CLASS> is <CLASS_MEMBERLIST> end Id
-        @Class_Class_Id_Is_End_Id2 = 124,          // <CLASS> ::= class Id is <CLASS_MEMBERLIST> end Id
-        @Class_memberlist = 125,                   // <CLASS_MEMBERLIST> ::= <CLASS_MEMBER>
-        @Class_memberlist2 = 126,                  // <CLASS_MEMBERLIST> ::= <CLASS_MEMBERLIST> <CLASS_MEMBER>
-        @Class_member = 127,                       // <CLASS_MEMBER> ::= <FIELD_DECL>
-        @Class_member2 = 128,                      // <CLASS_MEMBER> ::= <METHOD_DECL>
-        @Super_class_Extends_Id = 129              // <SUPER_CLASS> ::= extends Id
+        @Assignment_Lbracket_Rbracket_Eq = 21,     // <ASSIGNMENT> ::= <NAME> '[' <EXPRESSION> ']' '=' <EXPRESSION>
+        @Factor_This = 22,                         // <FACTOR> ::= this
+        @Factor_Super = 23,                        // <FACTOR> ::= super
+        @Factor_Number = 24,                       // <FACTOR> ::= Number
+        @Factor_False = 25,                        // <FACTOR> ::= false
+        @Factor_True = 26,                         // <FACTOR> ::= true
+        @Factor_Null = 27,                         // <FACTOR> ::= null
+        @Factor = 28,                              // <FACTOR> ::= <ALLOCATOR>
+        @Factor2 = 29,                             // <FACTOR> ::= <CAST_EXPR>
+        @Allocator_New_Lparan_Rparan = 30,         // <ALLOCATOR> ::= new <TYPE> '(' <ARGLIST> ')'
+        @Allocator_New_Lparan_Rparan2 = 31,        // <ALLOCATOR> ::= new <TYPE> '(' ')'
+        @Allocator_New_Lbracket_Rbracket = 32,     // <ALLOCATOR> ::= new <TYPE> '[' <EXPRESSION> ']'
+        @Arglist = 33,                             // <ARGLIST> ::= <ARGUMENT>
+        @Arglist_Comma = 34,                       // <ARGLIST> ::= <ARGLIST> ',' <ARGUMENT>
+        @Argument = 35,                            // <ARGUMENT> ::= <EXPRESSION>
+        @Argument_Ref = 36,                        // <ARGUMENT> ::= ref <EXPRESSION>
+        @Cast_expr_Cast_Lparan_Comma_Rparan = 37,  // <CAST_EXPR> ::= cast '(' <TYPE> ',' <EXPRESSION> ')'
+        @Expression = 38,                          // <EXPRESSION> ::= <EXPRESSION_TERM>
+        @Expression_Plus = 39,                     // <EXPRESSION> ::= <EXPRESSION> '+' <EXPRESSION_TERM>
+        @Expression_Minus = 40,                    // <EXPRESSION> ::= <EXPRESSION> '-' <EXPRESSION_TERM>
+        @Expression_term = 41,                     // <EXPRESSION_TERM> ::= <EXPRESSION_FACTOR>
+        @Expression_term_Times = 42,               // <EXPRESSION_TERM> ::= <EXPRESSION_TERM> '*' <EXPRESSION_FACTOR>
+        @Expression_term_Div = 43,                 // <EXPRESSION_TERM> ::= <EXPRESSION_TERM> '/' <EXPRESSION_FACTOR>
+        @Expression_factor = 44,                   // <EXPRESSION_FACTOR> ::= <EXPRESSION_BINARY>
+        @Expression_factor_Percent = 45,           // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '%' <EXPRESSION_BINARY>
+        @Expression_factor_Gt = 46,                // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '>' <EXPRESSION_BINARY>
+        @Expression_factor_Lt = 47,                // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '<' <EXPRESSION_BINARY>
+        @Expression_factor_Gteq = 48,              // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '>=' <EXPRESSION_BINARY>
+        @Expression_factor_Lteq = 49,              // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '<=' <EXPRESSION_BINARY>
+        @Expression_factor_Eqeq = 50,              // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '==' <EXPRESSION_BINARY>
+        @Expression_factor_Num = 51,               // <EXPRESSION_FACTOR> ::= <EXPRESSION_FACTOR> '#' <EXPRESSION_BINARY>
+        @Expression_binary = 52,                   // <EXPRESSION_BINARY> ::= <EXPRESSION_UNARY>
+        @Expression_binary_Ampamp = 53,            // <EXPRESSION_BINARY> ::= <EXPRESSION_BINARY> '&&' <EXPRESSION_UNARY>
+        @Expression_binary_Pipepipe = 54,          // <EXPRESSION_BINARY> ::= <EXPRESSION_BINARY> '||' <EXPRESSION_UNARY>
+        @Expression_unary_Plus = 55,               // <EXPRESSION_UNARY> ::= '+' <EXPRESSION_PRIMARY>
+        @Expression_unary_Minus = 56,              // <EXPRESSION_UNARY> ::= '-' <EXPRESSION_PRIMARY>
+        @Expression_unary_Exclam = 57,             // <EXPRESSION_UNARY> ::= '!' <EXPRESSION_PRIMARY>
+        @Expression_unary = 58,                    // <EXPRESSION_UNARY> ::= <EXPRESSION_PRIMARY>
+        @Expression_unary_Lbracket_Rbracket = 59,  // <EXPRESSION_UNARY> ::= <EXPRESSION_PRIMARY> '[' <EXPRESSION> ']'
+        @Expression_unary_Lparan_Rparan = 60,      // <EXPRESSION_UNARY> ::= <EXPRESSION_PRIMARY> '(' <ARGLIST> ')'
+        @Expression_primary = 61,                  // <EXPRESSION_PRIMARY> ::= <NAME>
+        @Expression_primary2 = 62,                 // <EXPRESSION_PRIMARY> ::= <FUNCTION_CALL>
+        @Expression_primary3 = 63,                 // <EXPRESSION_PRIMARY> ::= <FACTOR>
+        @Expression_primary_Lparan_Rparan = 64,    // <EXPRESSION_PRIMARY> ::= '(' <EXPRESSION> ')'
+        @Statements = 65,                          // <STATEMENTS> ::= <STATEMENT>
+        @Statements2 = 66,                         // <STATEMENTS> ::= <STATEMENTS> <STATEMENT>
+        @Statement = 67,                           // <STATEMENT> ::= <BLOCK>
+        @Statement2 = 68,                          // <STATEMENT> ::= <METHOD>
+        @Statement3 = 69,                          // <STATEMENT> ::= <CLASS>
+        @Statement_Semi = 70,                      // <STATEMENT> ::= <FUNCTION_CALL> ';'
+        @Statement_Semi2 = 71,                     // <STATEMENT> ::= <ASSIGNMENT> ';'
+        @Statement_Semi3 = 72,                     // <STATEMENT> ::= <INPUTSTMT> ';'
+        @Statement_Semi4 = 73,                     // <STATEMENT> ::= <OUTPUTSTMT> ';'
+        @Statement_Return_Semi = 74,               // <STATEMENT> ::= return <EXPRESSION> ';'
+        @Statement_Return_Semi2 = 75,              // <STATEMENT> ::= return ';'
+        @Statement_Continue_Semi = 76,             // <STATEMENT> ::= continue ';'
+        @Statement_Break_Semi = 77,                // <STATEMENT> ::= break ';'
+        @Statement4 = 78,                          // <STATEMENT> ::= <IFSTMT>
+        @Statement5 = 79,                          // <STATEMENT> ::= <TRYSTMT>
+        @Statement_Loop_End_Loop = 80,             // <STATEMENT> ::= loop <STATEMENTS> end loop
+        @Statement_Exit_Semi = 81,                 // <STATEMENT> ::= exit ';'
+        @Statement_Throw_Semi = 82,                // <STATEMENT> ::= throw <EXPRESSION> ';'
+        @Ifstmt_If_Then_End_If = 83,               // <IFSTMT> ::= if <EXPRESSION> then <STATEMENTS> end if
+        @Ifstmt_If_Then_End_If2 = 84,              // <IFSTMT> ::= if <EXPRESSION> then <STATEMENTS> <ELSEPART> end if
+        @Ifstmt_If_Then_End_If3 = 85,              // <IFSTMT> ::= if <EXPRESSION> then <STATEMENTS> <ELSEIF_PART> <ELSEPART> end if
+        @Elsepart_Else = 86,                       // <ELSEPART> ::= else <STATEMENTS>
+        @Elseif_part_Elsif_Then = 87,              // <ELSEIF_PART> ::= elsif <EXPRESSION> then <STATEMENTS>
+        @Elseif_part_Elsif_Then2 = 88,             // <ELSEIF_PART> ::= <ELSEIF_PART> elsif <EXPRESSION> then <STATEMENTS>
+        @Trystmt_Try_End_Try = 89,                 // <TRYSTMT> ::= try <STATEMENTS> <CATCH_CLAUSE> end try
+        @Catch_clause_Catch_Lparan_Id_Rparan = 90,  // <CATCH_CLAUSE> ::= catch '(' <TYPE> Id ')' <STATEMENTS>
+        @Catch_clause_Catch_Lparan_Id_Rparan2 = 91,  // <CATCH_CLAUSE> ::= catch '(' <TYPE> Id ')' <STATEMENTS> <CATCH_CLAUSE>
+        @Outputstmt_Output_Ltlt = 92,              // <OUTPUTSTMT> ::= output '<<' <EXPRESSION>
+        @Outputstmt_Output_Ltlt_Stringliteral = 93,  // <OUTPUTSTMT> ::= output '<<' StringLiteral
+        @Outputstmt_Output_Ltlt_Charliteral = 94,  // <OUTPUTSTMT> ::= output '<<' CharLiteral
+        @Inputstmt_Input_Gtgt = 95,                // <INPUTSTMT> ::= input '>>' <NAME>
+        @Type = 96,                                // <TYPE> ::= <STRUCTURE_TYPE>
+        @Type2 = 97,                               // <TYPE> ::= <PRIMITIVE_TYPE>
+        @Type3 = 98,                               // <TYPE> ::= <ARRAY_TYPE>
+        @Primitive_type_Integer = 99,              // <PRIMITIVE_TYPE> ::= integer
+        @Primitive_type_Boolean = 100,             // <PRIMITIVE_TYPE> ::= boolean
+        @Structure_type_Id = 101,                  // <STRUCTURE_TYPE> ::= Id
+        @Array_type_Lbracketrbracket = 102,        // <ARRAY_TYPE> ::= <STRUCTURE_TYPE> '[]'
+        @Array_type_Lbracketrbracket2 = 103,       // <ARRAY_TYPE> ::= <PRIMITIVE_TYPE> '[]'
+        @Access_spec_Private = 104,                // <ACCESS_SPEC> ::= private
+        @Access_spec_Protected = 105,              // <ACCESS_SPEC> ::= protected
+        @Access_spec_Public = 106,                 // <ACCESS_SPEC> ::= public
+        @Field_decl_Semi = 107,                    // <FIELD_DECL> ::= <ACCESS_SPEC> <TYPE> <FIELD_DECLLIST> ';'
+        @Field_decllist_Id = 108,                  // <FIELD_DECLLIST> ::= Id
+        @Field_decllist_Comma_Id = 109,            // <FIELD_DECLLIST> ::= <FIELD_DECLLIST> ',' Id
+        @Method_Method_Lparan_Rparan_Is_Id = 110,  // <METHOD> ::= method <M_TYPE> <METHOD_ID> '(' <PARAMETERS> ')' is <BODY> Id
+        @Method_Method_Lparan_Rparan_Is_Id2 = 111,  // <METHOD> ::= method <M_TYPE> <METHOD_ID> '(' ')' is <BODY> Id
+        @Method_decl_Method_Id_Lparan_Rparan_Semi = 112,  // <METHOD_DECL> ::= <ACCESS_SPEC> method <M_TYPE> Id '(' <PARAMETERS_DECL> ')' ';'
+        @Method_decl_Method_Id_Lparan_Rparan_Semi2 = 113,  // <METHOD_DECL> ::= <ACCESS_SPEC> method <M_TYPE> Id '(' ')' ';'
+        @Method_id_Id_Coloncolon_Id = 114,         // <METHOD_ID> ::= Id '::' Id
+        @Method_id_Id = 115,                       // <METHOD_ID> ::= Id
+        @M_type = 116,                             // <M_TYPE> ::= <TYPE>
+        @M_type_Void = 117,                        // <M_TYPE> ::= void
+        @Parameters = 118,                         // <PARAMETERS> ::= <PARAMETER>
+        @Parameters_Comma = 119,                   // <PARAMETERS> ::= <PARAMETERS> ',' <PARAMETER>
+        @Parameter_Id = 120,                       // <PARAMETER> ::= <TYPE> Id
+        @Parameter_Ref_Id = 121,                   // <PARAMETER> ::= ref <TYPE> Id
+        @Parameters_decl = 122,                    // <PARAMETERS_DECL> ::= <PARAMETER_DECL>
+        @Parameters_decl_Comma = 123,              // <PARAMETERS_DECL> ::= <PARAMETERS_DECL> ',' <PARAMETER_DECL>
+        @Parameter_decl_Id = 124,                  // <PARAMETER_DECL> ::= <TYPE> Id
+        @Parameter_decl = 125,                     // <PARAMETER_DECL> ::= <TYPE>
+        @Function_call_Call_Lparan_Rparan = 126,   // <FUNCTION_CALL> ::= call <NAME> '(' ')'
+        @Function_call_Call_Lparan_Rparan2 = 127,  // <FUNCTION_CALL> ::= call <NAME> '(' <ARGLIST> ')'
+        @Class_Class_Id_Is_End_Id = 128,           // <CLASS> ::= class Id <SUPER_CLASS> is <CLASS_MEMBERLIST> end Id
+        @Class_Class_Id_Is_End_Id2 = 129,          // <CLASS> ::= class Id is <CLASS_MEMBERLIST> end Id
+        @Class_memberlist = 130,                   // <CLASS_MEMBERLIST> ::= <CLASS_MEMBER>
+        @Class_memberlist2 = 131,                  // <CLASS_MEMBERLIST> ::= <CLASS_MEMBERLIST> <CLASS_MEMBER>
+        @Class_member = 132,                       // <CLASS_MEMBER> ::= <FIELD_DECL>
+        @Class_member2 = 133,                      // <CLASS_MEMBER> ::= <METHOD_DECL>
+        @Super_class_Extends_Id = 134              // <SUPER_CLASS> ::= extends Id
     }
 
     //public object program;	 //You might derive a specific object
@@ -447,6 +456,10 @@ public class CoolParser
                 // <ASSIGNMENT> ::= <NAME> '=' <EXPRESSION>
                 break;
 
+            case (short)ProductionIndex.Assignment_Lbracket_Rbracket_Eq:                 
+                // <ASSIGNMENT> ::= <NAME> '[' <EXPRESSION> ']' '=' <EXPRESSION>
+                break;
+
             case (short)ProductionIndex.Factor_This:
                 // <FACTOR> ::= this
                 break;
@@ -491,12 +504,20 @@ public class CoolParser
                 // <ALLOCATOR> ::= new <TYPE> '[' <EXPRESSION> ']'
                 break;
 
-            case (short)ProductionIndex.Arglist:
-                // <ARGLIST> ::= <EXPRESSION>
+            case (short)ProductionIndex.Arglist:                 
+                // <ARGLIST> ::= <ARGUMENT>
                 break;
 
-            case (short)ProductionIndex.Arglist_Comma:
-                // <ARGLIST> ::= <ARGLIST> ',' <EXPRESSION>
+            case (short)ProductionIndex.Arglist_Comma:                 
+                // <ARGLIST> ::= <ARGLIST> ',' <ARGUMENT>
+                break;
+
+            case (short)ProductionIndex.Argument:                 
+                // <ARGUMENT> ::= <EXPRESSION>
+                break;
+
+            case (short)ProductionIndex.Argument_Ref:                 
+                // <ARGUMENT> ::= ref <EXPRESSION>
                 break;
 
             case (short)ProductionIndex.Cast_expr_Cast_Lparan_Comma_Rparan:
@@ -799,8 +820,8 @@ public class CoolParser
                 // <METHOD> ::= method <M_TYPE> <METHOD_ID> '(' ')' is <BODY> Id
                 break;
 
-            case (short)ProductionIndex.Method_decl_Method_Id_Lparan_Rparan_Semi:
-                // <METHOD_DECL> ::= <ACCESS_SPEC> method <M_TYPE> Id '(' <PARAMETER_DECL> ')' ';'
+            case (short)ProductionIndex.Method_decl_Method_Id_Lparan_Rparan_Semi:                 
+                // <METHOD_DECL> ::= <ACCESS_SPEC> method <M_TYPE> Id '(' <PARAMETERS_DECL> ')' ';'
                 break;
 
             case (short)ProductionIndex.Method_decl_Method_Id_Lparan_Rparan_Semi2:
@@ -823,28 +844,36 @@ public class CoolParser
                 // <M_TYPE> ::= void
                 break;
 
-            case (short)ProductionIndex.Parameters_Id:
-                // <PARAMETERS> ::= <TYPE> Id
+            case (short)ProductionIndex.Parameters:                 
+                // <PARAMETERS> ::= <PARAMETER>
                 break;
 
-            case (short)ProductionIndex.Parameters_Comma_Id:
-                // <PARAMETERS> ::= <PARAMETERS> ',' <TYPE> Id
+            case (short)ProductionIndex.Parameters_Comma:                 
+                // <PARAMETERS> ::= <PARAMETERS> ',' <PARAMETER>
                 break;
 
-            case (short)ProductionIndex.Parameter_decl_Id:
+            case (short)ProductionIndex.Parameter_Id:                 
+                // <PARAMETER> ::= <TYPE> Id
+                break;
+
+            case (short)ProductionIndex.Parameter_Ref_Id:                 
+                // <PARAMETER> ::= ref <TYPE> Id
+                break;
+
+            case (short)ProductionIndex.Parameters_decl:                 
+                // <PARAMETERS_DECL> ::= <PARAMETER_DECL>
+                break;
+
+            case (short)ProductionIndex.Parameters_decl_Comma:                 
+                // <PARAMETERS_DECL> ::= <PARAMETERS_DECL> ',' <PARAMETER_DECL>
+                break;
+
+            case (short)ProductionIndex.Parameter_decl_Id:                 
                 // <PARAMETER_DECL> ::= <TYPE> Id
                 break;
 
-            case (short)ProductionIndex.Parameter_decl:
+            case (short)ProductionIndex.Parameter_decl:                 
                 // <PARAMETER_DECL> ::= <TYPE>
-                break;
-
-            case (short)ProductionIndex.Parameter_decl_Comma_Id:
-                // <PARAMETER_DECL> ::= <PARAMETER_DECL> ',' <TYPE> Id
-                break;
-
-            case (short)ProductionIndex.Parameter_decl_Comma:
-                // <PARAMETER_DECL> ::= <PARAMETER_DECL> ',' <TYPE>
                 break;
 
             case (short)ProductionIndex.Function_call_Call_Lparan_Rparan:

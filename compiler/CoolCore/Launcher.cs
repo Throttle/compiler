@@ -14,7 +14,7 @@ namespace CoolCore
         {
             CoolCore.Language language = null;
             string pathToGrammarEGT = System.IO.Path.GetFullPath("./../../../compiler/Data/Cool.egt");
-            string pathToExampleEGT = System.IO.Path.GetFullPath("./../../../compiler/Data/example_loop.cool");
+            string pathToExampleEGT = System.IO.Path.GetFullPath("./../../../compiler/Data/example_arrays.cool");
             language = CoolCore.Language.FromFile(pathToGrammarEGT);
             CoolCore.Compiler.Scanner scanner = new CoolCore.Compiler.Scanner(pathToExampleEGT, language);
             CoolCore.Compiler.Parser parser = new CoolCore.Compiler.Parser(scanner, language);
